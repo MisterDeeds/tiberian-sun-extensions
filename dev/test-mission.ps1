@@ -1,4 +1,4 @@
-# Starts one mission in the game and reports whether it runs (game logic advances) or hangs.
+﻿# Starts one mission in the game and reports whether it runs (game logic advances) or hangs.
 # The map is copied as TSXG01.MAP (first mission of the first extension campaign); the campaign list must be installed.
 #   .\dev\test-mission.ps1 -Map .\analysis\variants\v1.MAP
 # Needs native resolution in SUN.INI (click positions) and takes over the screen for about 90 seconds.
@@ -10,7 +10,7 @@ Get-Process -Name game -ErrorAction SilentlyContinue | Stop-Process -Force
 Start-Sleep -Seconds 2
 Copy-Item -LiteralPath (Resolve-Path $Map) -Destination (Join-Path $game $As) -Force
 $psi = New-Object System.Diagnostics.ProcessStartInfo (Join-Path $game 'Game.exe')
-$psi.WorkingDirectory = $game; $psi.UseShellExecute = $false
+$psi.WorkingDirectory = $game; $psi.UseShellExecute = $true
 $p = [System.Diagnostics.Process]::Start($psi)
 $gp = $null
 try {
@@ -47,5 +47,7 @@ try {
 }
 finally {
     if ($gp) { $gp.Dispose() }
-    if (-not $p.HasExited) { $p.Kill() }
+    if (-not $p.HasExited -and -not $env:TSEXT_KEEP) { $p.Kill() }
 }
+
+

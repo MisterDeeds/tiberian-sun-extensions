@@ -41,6 +41,8 @@ function Get-OptionCatalog {
             Choices = @(@('0', (Txt 'original (50-175 cells)' 'Original (50-175 Felder)')), @('1', (Txt 'large (up to 220)' 'gross (bis 220)')), @('2', (Txt 'huge (200-235)' 'riesig (200-235)'))) }
         @{ Id = 'fog'; Group = (Txt 'World' 'Welt'); Label = (Txt 'Fog of war' 'Nebel des Krieges'); Default = '0'
             Choices = @(@('0', (Txt 'original' 'Original')), @('1', (Txt 'on' 'an'))) }
+        @{ Id = 'speed'; Group = (Txt 'Display' 'Anzeige'); Label = (Txt 'Game speed' 'Spieltempo'); Default = 'keep'
+            Choices = @(@('keep', (Txt 'unchanged (as in the game)' 'unverändert (wie im Spiel eingestellt)')), @('1', (Txt '60 frames/s: fast and smooth' '60 Bilder/s: schnell und flüssig')), @('2', (Txt '30 frames/s: classic' '30 Bilder/s: klassisch')), @('3', (Txt '20 frames/s: relaxed' '20 Bilder/s: gemächlich')), @('0', (Txt 'unlimited (up to 120 frames/s, very fast)' 'unbegrenzt (bis 120 Bilder/s, sehr schnell)'))) }
         @{ Id = 'resolution'; Group = (Txt 'Display' 'Anzeige'); Label = (Txt 'Resolution' 'Auflösung'); Default = 'native'
             Choices = @(@('native', (Txt 'screen resolution: sharp, see much more of the map' 'Bildschirmauflösung: scharf, viel mehr von der Karte')), @('keep', (Txt 'unchanged (as in SUN.INI)' 'unverändert (wie in SUN.INI)')), @('1920x1080', '1920 × 1080'), @('1280x720', (Txt '1280 × 720 (big pixels)' '1280 × 720 (grosse Pixel)'))) }
     )
@@ -49,8 +51,8 @@ function Get-OptionCatalog {
 function Get-Presets {
     return [ordered]@{
         (Txt 'Original' 'Original') = @{ rmgsize = '0' }
-        (Txt 'Everything bigger' 'Alles grösser') = @{ rmgsize = '2'; arsenal = '1'; ai = '1'; buildspeed = '2'; harvester = '1.5'; resolution = 'native' }
-        (Txt 'Relaxed' 'Gemütlich') = @{ cost = '0.5'; buildspeed = '3'; tibvalue = '2'; harvester = '2'; power = '2'; growth = '2'; arsenal = '1' }
+        (Txt 'Everything bigger' 'Alles grösser') = @{ speed = '1'; rmgsize = '2'; arsenal = '1'; ai = '1'; buildspeed = '2'; harvester = '1.5'; resolution = 'native' }
+        (Txt 'Relaxed' 'Gemütlich') = @{ speed = '2'; cost = '0.5'; buildspeed = '3'; tibvalue = '2'; harvester = '2'; power = '2'; growth = '2'; arsenal = '1' }
         (Txt 'Hard test' 'Harte Probe') = @{ ai = '2'; superweapon = '0.5'; veteran = '2'; chaos = '1'; rmgsize = '1' }
         (Txt 'Chaos' 'Chaos') = @{ chaos = '1'; fog = '1'; arsenal = '1'; superweapon = '0.25'; veteran = '4'; strength = '1.5'; rmgsize = '2' }
     }
@@ -226,3 +228,23 @@ function Set-GameResolution([string]$gameDir, [string]$value) {
 
 
 
+
+# Game speed in SUN.INI ([Options] GameSpeed: 0 = unlimited, 1 = 60, 2 = 30, 3 = 20, 4 = 15 frames per second,
+# measured in the game). Times in missions (waves, countdown) are game time and follow this speed.
+# The launcher sets it before the game and writes the previous value back afterwards.
+function Get-GameSpeed([string]$gameDir) {
+    $sun = Join-Path $gameDir 'SUN.INI'
+    if (-not (Test-Path -LiteralPath $sun)) { return '' }
+    $m = [regex]::Match([IO.File]::ReadAllText($sun, [Text.Encoding]::Default), '(?m)^[ \t]*GameSpeed[ \t]*=[ \t]*(\d+)')
+    if ($m.Success) { $m.Groups[1].Value } else { '' }
+}
+
+function Set-GameSpeed([string]$gameDir, [string]$value) {
+    if (-not $value -or $value -eq 'keep') { return }
+    $sun = Join-Path $gameDir 'SUN.INI'
+    if (-not (Test-Path -LiteralPath $sun)) { return }
+    $text = [IO.File]::ReadAllText($sun, [Text.Encoding]::Default)
+    if ($text -match '(?m)^[ \t]*GameSpeed[ \t]*=') { $text = [regex]::Replace($text, '(?m)^([ \t]*GameSpeed[ \t]*=)[^\r\n]*', ('${1}' + $value)) }
+    else { $text = [regex]::Replace($text, '(?m)^\[Options\][ \t]*\r?$', ('[Options]' + "`r`n" + 'GameSpeed=' + $value)) }
+    [IO.File]::WriteAllText($sun, $text, [Text.Encoding]::Default)
+}

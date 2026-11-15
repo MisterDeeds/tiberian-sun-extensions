@@ -1,4 +1,4 @@
-TIBERIAN SUN - ERWEITERUNGEN 1.0.0
+﻿TIBERIAN SUN - ERWEITERUNGEN 1.1.0
 ==================================
 
 Fan-Projekt für Command & Conquer Tiberian Sun und Feuersturm (Steam).
@@ -16,7 +16,14 @@ mit "gross" bis 220 (Original: höchstens 175, mit 4 Spielern 128).
 
 SCHARFE GRAFIK
 Standard ist die Bildschirmauflösung: das Spiel wird 1:1 gezeichnet statt gestreckt, und du siehst viel mehr
-von der Karte. Nach dem Spiel wird die vorherige Auflösung wieder eingetragen.
+von der Karte. Die Seitenleiste reicht über die ganze Bildschirmhöhe (bis 40 Bauzeilen statt 20).
+Nach dem Spiel wird die vorherige Auflösung wieder eingetragen.
+
+SPIELTEMPO
+Das Spiel rechnet so viele Bilder pro Sekunde, wie das Spieltempo erlaubt; auf "unbegrenzt" sind das mit der
+Steam-Version bis 120 Bilder/s, alles läuft dann achtmal so schnell wie bei 15 Bilder/s. Die Option
+"Spieltempo" stellt 60, 30 oder 20 Bilder/s ein. Countdown und Angriffswellen der Missionen laufen in
+Spielzeit mit.
 
 NEUE KAMPAGNEN
 Neuer Feldzug > "Erweiterung - GDI: Operation Morgenröte", "Erweiterung - Nod: Kanes Erbe" oder eine
@@ -28,7 +35,7 @@ WAS WO GEÄNDERT WIRD
 - Regel-Optionen: EXPAND99.MIX im Spielordner, nur solange das Spiel läuft.
 - Zufallskarten-Grösse und Seitenleisten-Fix: nur im Arbeitsspeicher des laufenden Spiels.
 - Kampagnen: TSX*.MAP und BATTLEX.INI im Spielordner.
-- Auflösung: [Video] in SUN.INI, nach dem Spiel zurückgestellt.
+- Auflösung und Spieltempo: [Video] und [Options] in SUN.INI, nach dem Spiel zurückgestellt.
 Keine Originaldatei wird verändert. Ein Start über Steam ist immer das Original.
 
 ENTFERNEN
@@ -40,3 +47,5 @@ HINWEISE
   die neuen Kampagnen).
 - Nur für das Einzelspiel.
 - Technische Details: docs\FINDINGS.md
+
+

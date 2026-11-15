@@ -1,4 +1,4 @@
-# Starts the game for a test, logs its windows, reads addresses and saves window pictures, then ends it.
+﻿# Starts the game for a test, logs its windows, reads addresses and saves window pictures, then ends it.
 #   .\dev\game-probe.ps1 -Seconds 40 -Read 0x7e2240 -Steps 'wait:15','shot','cmd:<dlgtext>:<id>','key:13','click:x,y'
 # Pictures go to analysis\shots. Does nothing while you are using the PC (idle check), unless -Force.
 param(
@@ -23,7 +23,7 @@ if (-not $p) {
     $psi = New-Object System.Diagnostics.ProcessStartInfo (Join-Path $game 'Game.exe')
     $psi.WorkingDirectory = $game
     $psi.Arguments = $Args
-    $psi.UseShellExecute = $false
+    $psi.UseShellExecute = $true
     $p = [System.Diagnostics.Process]::Start($psi)
     "started pid $($p.Id)"
 }
@@ -155,3 +155,4 @@ finally {
     if (-not $KeepRunning -and -not $p.HasExited) { $p.Kill(); 'game ended' }
     $gp.Dispose()
 }
+

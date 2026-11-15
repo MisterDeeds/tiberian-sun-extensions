@@ -40,11 +40,53 @@ function Get-SidebarCave([byte[]]$lea, [int]$max) {
     return [byte[]]($lea + @(0x3D) + $m + @(0x7E, 0x05, 0xB8) + $m + @(0xA3, 0x4C, 0xC2, 0x74, 0x00))
 }
 
+# Full-height sidebar: the button array moves to new memory with room for 2 x 40 rows. Every place that uses the
+# array holds its address in the instruction (11 places, found by a byte scan of the whole code), and every place that
+# computes "row + column * 20" gets column * 40 instead (6 address computations change their scale from 4 to 8,
+# and the column loop of the sidebar setup adds 40 instead of 20). All bytes are checked before anything is written.
+$script:SidebarRowsExtended = 40
+$script:SidebarArrayOld = 0x80B950
+$script:SidebarArrayRefs = @(
+    # address of the 4-byte displacement, field offset inside an entry
+    @(0x5F407C, 0x0), @(0x5F4143, 0x0), @(0x5F43DC, 0x0), @(0x5F452A, 0x0), @(0x5F454A, 0x0), @(0x5F4615, 0x0),
+    @(0x5F63BD, 0x0), @(0x5F63D6, 0x10), @(0x5F63DC, 0xC), @(0x5F63EF, 0x18), @(0x5F63FF, 0x14)
+)
+$script:SidebarStridePatches = @(
+    # address, original byte, new byte
+    @(0x5F406D, 0x97, 0xD7), @(0x5F4134, 0x97, 0xD7), @(0x5F43D2, 0x87, 0xC7), @(0x5F4520, 0x97, 0xD7),
+    @(0x5F453B, 0x87, 0xC7), @(0x5F4606, 0x96, 0xD6), @(0x5F6452, 0x14, 0x28)
+)
+
+function Invoke-SidebarExtend($gp) {
+    # already done in this process?
+    $first = $gp.ReadUInt([uint32]$script:SidebarArrayRefs[0][0])
+    if ($first -ne $script:SidebarArrayOld) { return 'sidebar rows: already' }
+    foreach ($r in $script:SidebarArrayRefs) {
+        if ($gp.ReadUInt([uint32]$r[0]) -ne [uint32]($script:SidebarArrayOld + $r[1])) { return ('sidebar rows: mismatch at 0x{0:X}' -f $r[0]) }
+    }
+    foreach ($s in $script:SidebarStridePatches) {
+        if ($gp.ReadByte([uint32]$s[0]) -ne [byte]$s[1]) { return ('sidebar rows: mismatch at 0x{0:X}' -f $s[0]) }
+    }
+    $entries = 2 * $script:SidebarRowsExtended
+    $entry = $gp.Read([uint32]$script:SidebarArrayOld, 0x34)     # a constructed, still unused button
+    $mem = $gp.Alloc($entries * 0x34 + 0x40)
+    $buf = New-Object byte[] ($entries * 0x34)
+    for ($i = 0; $i -lt $entries; $i++) { [Array]::Copy($entry, 0, $buf, $i * 0x34, 0x34) }
+    $gp.Write($mem, $buf)
+    foreach ($r in $script:SidebarArrayRefs) { $gp.Write([uint32]$r[0], [BitConverter]::GetBytes([uint32]($mem + $r[1]))) }
+    foreach ($s in $script:SidebarStridePatches) { $gp.Write([uint32]$s[0], [byte[]]@([byte]$s[2])) }
+    return ('sidebar rows: {0} per column (array at 0x{1:X})' -f $script:SidebarRowsExtended, $mem)
+}
+
 function Invoke-SidebarFix($gp) {
     $log = @()
+    $ext = Invoke-SidebarExtend $gp
+    $log += $ext
+    $rows = if ($ext -match 'per column|already') { $script:SidebarRowsExtended } else { 20 }
+    $max = 46 + $rows * 51
     foreach ($h in $script:SidebarHooks) {
-        $r = $gp.InstallHook([uint32]$h.At, $h.Orig, (Get-SidebarCave $h.Lea $script:SidebarMaxHeight))
-        $log += ('sidebar 0x{0:X}: {1}' -f $h.At, $r)
+        $r = $gp.InstallHook([uint32]$h.At, $h.Orig, (Get-SidebarCave $h.Lea $max))
+        $log += ('sidebar 0x{0:X}: {1} (max height {2})' -f $h.At, $r, $max)
     }
     return $log
 }

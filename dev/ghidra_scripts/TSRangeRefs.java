@@ -36,8 +36,9 @@ public class TSRangeRefs extends GhidraScript {
             for (Map.Entry<Address, List<String>> e : byTarget.entrySet()) {
                 pw.printf("%s (%d refs)%n", e.getKey(), e.getValue().size());
                 int n = 0;
-                for (String s : e.getValue()) { if (n++ < 6) pw.println("    " + s); }
+                for (String s : e.getValue()) { if (n++ < 400) pw.println("    " + s); }
             }
         }
     }
 }
+

@@ -109,7 +109,7 @@ if (-not $NoShortcuts) {
     }
     New-Item -Path $UninstallKey -Force | Out-Null
     $uninst = "`"$ps`" -NoProfile -ExecutionPolicy Bypass -File `"$(Join-Path $TargetFolder 'install.ps1')`" -Remove"
-    foreach ($kv in @(@('DisplayName', (Txt 'Tiberian Sun - Extensions' 'Tiberian Sun - Erweiterungen')), @('DisplayVersion', '1.0.0'), @('Publisher', 'Fan project'),
+    foreach ($kv in @(@('DisplayName', (Txt 'Tiberian Sun - Extensions' 'Tiberian Sun - Erweiterungen')), @('DisplayVersion', '1.1.0'), @('Publisher', 'Fan project'),
             @('InstallLocation', $TargetFolder), @('UninstallString', $uninst), @('DisplayIcon', $icon), @('NoModify', 1), @('NoRepair', 1))) {
         if ($kv[1] -is [int]) { New-ItemProperty -Path $UninstallKey -Name $kv[0] -Value $kv[1] -PropertyType DWord -Force | Out-Null }
         else { New-ItemProperty -Path $UninstallKey -Name $kv[0] -Value $kv[1] -PropertyType String -Force | Out-Null }
@@ -117,3 +117,4 @@ if (-not $NoShortcuts) {
     (Txt "Shortcut created: $ShortcutName (desktop and Start menu)" "Verknüpfung erstellt: $ShortcutName (Desktop und Startmenü)")
 }
 (Txt 'Done.' 'Fertig.')
+

@@ -521,7 +521,9 @@ namespace TSExt
         public string AddTriggerFlags(string name, string house, int repeat, string[] events, string[] actions, bool disabled, bool easy, bool normal, bool hard)
         {
             string id = NewId();
-            trig.Set(id, string.Format("{0},<none>,{1},{2},{3},{4},{5},{6}", house, name, disabled ? 1 : 0, easy ? 1 : 0, normal ? 1 : 0, hard ? 1 : 0, repeat == 2 ? 1 : 0));
+            // The last field stays 0 like in every official map: repetition comes from the tag (2). A 1 here made the
+            // game fire a repeating trigger again and again (checked in the game: dozens of attack waves in two minutes).
+            trig.Set(id, string.Format("{0},<none>,{1},{2},{3},{4},{5},0", house, name, disabled ? 1 : 0, easy ? 1 : 0, normal ? 1 : 0, hard ? 1 : 0));
             ev.Set(id, events.Length + "," + string.Join(",", events));
             act.Set(id, actions.Length + "," + string.Join(",", actions));
             string tagId = NewId();

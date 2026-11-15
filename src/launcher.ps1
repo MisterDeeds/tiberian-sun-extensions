@@ -17,7 +17,7 @@ $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Windows.Forms, System.Drawing
 [System.Windows.Forms.Application]::EnableVisualStyles()
 
-$Version = '1.0.0'
+$Version = '1.1.0'
 if (-not $GameDir) { $GameDir = Find-TSGame }
 $SettingsDir = Join-Path $env:APPDATA 'TSExtensions'
 $SettingsFile = Join-Path $SettingsDir 'settings.json'
@@ -35,6 +35,7 @@ function Save-Settings($s) {
     ([pscustomobject]$s) | ConvertTo-Json | Set-Content -LiteralPath $SettingsFile -Encoding UTF8
 }
 $RestoreFile = Join-Path $SettingsDir 'restore-resolution.txt'
+$SpeedRestoreFile = Join-Path $SettingsDir 'restore-speed.txt'
 
 # After the game: rules file away, resolution back to what it was (a game started from Steam must not use a
 # resolution that needs our sidebar fix).
@@ -44,6 +45,11 @@ function Restore-AfterGame {
         $r = (Get-Content -LiteralPath $RestoreFile -TotalCount 1).Trim()
         if ($r -match '^\d+x\d+$') { Set-GameResolution $GameDir $r }
         Remove-Item -LiteralPath $RestoreFile -Force
+    }
+    if (Test-Path -LiteralPath $SpeedRestoreFile) {
+        $v = (Get-Content -LiteralPath $SpeedRestoreFile -TotalCount 1).Trim()
+        if ($v -match '^\d+$') { Set-GameSpeed $GameDir $v }
+        Remove-Item -LiteralPath $SpeedRestoreFile -Force
     }
 }
 
@@ -307,6 +313,14 @@ function Start-TheGame([bool]$withExtensions) {
                 Write-RulesMix $GameDir (New-RulesFile $files $s)
             }
         }
+        $speedBefore = Get-GameSpeed $GameDir
+        if ($s['speed'] -and $s['speed'] -ne 'keep' -and $speedBefore -ne $s['speed']) {
+            if ($speedBefore) {
+                New-Item -ItemType Directory -Force $SettingsDir | Out-Null
+                Set-Content -LiteralPath $SpeedRestoreFile -Value $speedBefore -Encoding ASCII   # back to this when the game ends
+            }
+            Set-GameSpeed $GameDir $s['speed']
+        }
         $target = Resolve-Resolution $s['resolution']
         if ($target) {
             # Without our sidebar fix (unknown Game.exe) high screens crash the game: stay at a safe resolution.
@@ -354,5 +368,7 @@ $form.Add_Shown({
     })
 $form.Add_FormClosing({ if (-not (Get-GameProcess)) { Restore-AfterGame } })
 [void]$form.ShowDialog()
+
+
 
 

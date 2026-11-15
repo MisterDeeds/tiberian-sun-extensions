@@ -114,6 +114,40 @@ Firestorm mission.
   46 + 20 × 51 = 1066. Without the fix the highest safe screen is 148 + 1066 = 1214 pixels.
 - Checked: 2560 × 1440 skirmish on a 225 × 225 map and campaign missions run with the fix.
 
+### Full-height sidebar (1.1)
+
+- A byte scan of the whole code for addresses inside the array (0x80B950 … 0x80C170) finds exactly 12 places in
+  the sidebar code: the static initializer at 0x5F2294 (runs before any patch) and 11 runtime places –
+  displacements at 0x5F407C, 0x5F4143, 0x5F43DC, 0x5F452A, 0x5F454A, 0x5F4615 (entry base, `LEA r,[idx*4+0x80B950]`),
+  0x5F63BD (`LEA EBP,[ESI+0x80B950]`) and 0x5F63D6 / 0x5F63DC / 0x5F63EF / 0x5F63FF (fields +0x10, +0xC, +0x18, +0x14).
+  0x5F45FE … 0x5F4619 is code Ghidra did not mark as a function. Other hits elsewhere are unaligned byte coincidences.
+- The index is `row + column × 20`, computed as `LEA r1,[col+col*4]; LEA r2,[row+r1*4]`. Changing the SIB scale of
+  the second LEA from 4 to 8 makes it `row + column × 40`: 0x5F406D, 0x5F4134, 0x5F4520 (0x97 → 0xD7),
+  0x5F43D2, 0x5F453B (0x87 → 0xC7), 0x5F4606 (0x96 → 0xD6). The setup loop of FUN_005F6080 adds 20 per column at
+  0x5F6450 (`ADD EDX,0x14` → `0x28`).
+- The patch allocates 80 entries, fills them with a copy of the (still unused) first button, rewrites the 11
+  displacements and the 7 strides, and raises the height limit to 46 + 40 × 51 = 2086 pixels.
+- Checked at 2560 × 1440: 24 rows per column, buttons of both columns at the right places (column 1 x = 2416, column 2
+  x = 2484, rows 51 pixels apart), linked into the gadget list; a building ordered from column 1 is built.
+
+## Trigger timing (1.1)
+
+- The game logic runs one step per frame. Frames per second by `[Options] GameSpeed` in SUN.INI, measured with the
+  frame counter at 0x7E4924: 0 = unlimited (120 with the Steam DDrawCompat limit `FpsLimiter = msgloop(120)`),
+  1 = 60, 3 = 20, 4 = 15.
+- Event 13 "Elapsed time", the mission timer (actions 27/25/26, event 14) count **game time** (frames ÷ 15):
+  a repeating trigger with 13 = 30 spawned a unit about every 3.7 s at 120 frames/s; a countdown set to 1200 ran
+  from 18:32 to 10:31 in one real minute.
+- Event 47 "Elapsed scenario time" uses the scenario's ElapsedTimer (`Scen+0x610`, started / `+0x618` accumulated),
+  driven by the 60 Hz system timer (FUN_0060AB10), i.e. real time.
+- Repeating triggers: tag repeat flag 2, and the last field of the trigger line 0 – every official map writes 0 there.
+- Version 1.0 mixed both (waves on event 13 with values meant as real seconds, tiers and survival on event 47); at
+  120 frames/s the waves came every ~27 s and overran the base in two minutes. 1.1 uses game time everywhere:
+  waves on event 13, wave tiers via locals set by one-shot event-13 triggers, survival / defense / time limit on the
+  countdown (event 14) together with a local that is set when the countdown starts.
+- Checked in the game: "The Long Night" (survival, 20 game minutes) showed the countdown and ended with the score
+  screen; mission 1 held two real minutes without anyone playing.
+
 ## Display
 
 The Steam release ships DDrawCompat 0.5.4 (`ddraw.dll`, `DDrawCompat.ini`: point filter, FPS limit 120). The default

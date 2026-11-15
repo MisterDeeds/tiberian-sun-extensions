@@ -42,4 +42,19 @@ foreach ($pn in (Get-Presets).Keys) {
     $ini = [TSExt.IniFile]::Parse($b)
     Check ("preset {0}: {1} sections, starts with marker" -f $pn, $ini.Sections.Count) ($ini.Sections.Count -ge $orig.Sections.Count -and ([TSExt.IniFile]::Enc.GetString($b, 0, 60)).StartsWith('; Tiberian Sun Extensions'))
 }
+# game speed in a copy of SUN.INI: set and set back, the rest of the file stays byte for byte
+$tmpDir = Join-Path ([IO.Path]::GetTempPath()) ('tsext-speed-' + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Force $tmpDir | Out-Null
+$sunText = "[Intro]`r`nPlaySide01=no`r`n`r`n[Options]`r`nGameSpeed=0`r`nDifficulty=1`r`n`r`n[Video]`r`nScreenWidth=1920`r`n"
+[IO.File]::WriteAllText((Join-Path $tmpDir 'SUN.INI'), $sunText, [Text.Encoding]::Default)
+Check 'speed: read 0' ((Get-GameSpeed $tmpDir) -eq '0')
+Set-GameSpeed $tmpDir '2'
+$changed = [IO.File]::ReadAllText((Join-Path $tmpDir 'SUN.INI'), [Text.Encoding]::Default)
+Check 'speed: set 2, line endings kept' ((Get-GameSpeed $tmpDir) -eq '2' -and $changed -eq $sunText.Replace('GameSpeed=0', 'GameSpeed=2'))
+Set-GameSpeed $tmpDir 'keep'
+Check 'speed: keep changes nothing' ((Get-GameSpeed $tmpDir) -eq '2')
+Set-GameSpeed $tmpDir '0'
+Check 'speed: set back, file identical' ([IO.File]::ReadAllText((Join-Path $tmpDir 'SUN.INI'), [Text.Encoding]::Default) -eq $sunText)
+Remove-Item -Recurse -Force $tmpDir
+
 if ($errors) { "$errors errors"; exit 1 } else { 'all rules checks ok' }

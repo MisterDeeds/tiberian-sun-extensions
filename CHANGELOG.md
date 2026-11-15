@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.1.0 – 2026-11-16
+
+- Full-height sidebar: at high resolutions the sidebar now reaches from top to bottom with up to 40 build rows per
+  column instead of ending after 20 (button array moved to new memory, 11 addresses and 7 index computations
+  patched).
+- New option *Game speed*: 60, 30 or 20 frames per second, or unlimited (120 with the Steam version).
+  Presets: *Everything bigger* 60, *Relaxed* 30. Like the resolution, the previous speed is written back to
+  SUN.INI when the game ends.
+- Missions fixed: attack waves came far too often (repeating triggers had a 1 in the last field, and waves were timed
+  in real seconds while the game counts game time) and overran the player's base within two minutes. All mission
+  times now use game time like the original missions; survival, defense and time limits run on the on-screen
+  countdown. Win and lose conditions use "destroyed all" like the original missions.
+- Units placed by the missions never get an empty tag (an empty tag made the path finder of a harvester hang).
+
 ## 1.0.0 – 2026-11-15
 
 First release.

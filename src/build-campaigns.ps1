@@ -246,7 +246,7 @@ foreach ($camp in $catalog.campaigns) {
                 Add-Force $mb $pl $h $Garrison[$enemySide][$strength] $s.X $s.Y 'Area Guard' 0
                 $mb.AddTrigger("$h AI", $h, 0, @([TSExt.MissionBuilder]::Ev(47, 3)),
                     @([TSExt.MissionBuilder]::Act(3, $hi), [TSExt.MissionBuilder]::Act(74, $hi), [TSExt.MissionBuilder]::Act(13, $hi), [TSExt.MissionBuilder]::Act(30, 1))) | Out-Null
-                $winEvents += [TSExt.MissionBuilder]::Ev(10, $hi)
+                $winEvents += [TSExt.MissionBuilder]::Ev(11, $hi)
                 if ($ms.target -and -not $targetTagged) {
                     $tgt = $placed | Where-Object { $_.Type -eq [string]$ms.target } | Select-Object -First 1
                     if ($tgt) {
@@ -256,9 +256,10 @@ foreach ($camp in $catalog.campaigns) {
                     }
                 }
             }
-            # attack waves: four tiers, one set per difficulty (Easy / Normal / Hard)
-            $tierStart = @(0, 360, 720, 1200)
-            $interval = if ($strength -eq 'waves') { @(150, 110, 75) } else { @(300, 220, 160) }
+            # Attack waves: four tiers, one trigger set per difficulty (Easy / Normal / Hard).
+            # Times are game seconds (event 13 counts game frames / 15, like the countdown), so they scale with the
+            # game speed like everything else in the game. Tiers 2-4 wait for the local variable of their tier.
+            $interval = if ($strength -eq 'waves') { @(300, 240, 180) } else { @(600, 450, 330) }
             $script = $mb.AddScript("Hunt", [string[]]@('0,2', '11,14'))
             for ($t = 0; $t -lt 4; $t++) {
                 $tf = $mb.AddTaskForce("$h wave $($t+1)", [string[]]($Waves[$enemySide][$t].Split('|')))
@@ -266,20 +267,28 @@ foreach ($camp in $catalog.campaigns) {
                 for ($d = 0; $d -lt 3; $d++) {
                     if ($d -eq 0 -and $t -eq 3) { continue }   # no last tier on Easy
                     $evs = @([TSExt.MissionBuilder]::Ev(13, $interval[$d] + 30 * $t))
-                    if ($tierStart[$t] -gt 0) { $evs += [TSExt.MissionBuilder]::Ev(47, $tierStart[$t]) }
+                    if ($t -gt 0) { $evs += [TSExt.MissionBuilder]::Ev(36, $t - 1) }
                     $mb.AddTriggerDiff("$h wave $($t+1) d$d", $h, 2, $evs, @([TSExt.MissionBuilder]::ActTeamAt(80, $team, $wp)), $d) | Out-Null
                 }
             }
         }
+        # wave tiers 2-4 begin after 10, 20 and 33 game minutes (locals 0-2)
+        $tierStart = @(600, 1200, 2000)
+        for ($t = 0; $t -lt 3; $t++) {
+            $mb.SetVariable($t, "Wave tier $($t + 2)")
+            $mb.AddTrigger("Wave tier $($t + 2)", $playerHouse, 0, @([TSExt.MissionBuilder]::Ev(13, $tierStart[$t])), @([TSExt.MissionBuilder]::Act(56, $t))) | Out-Null
+        }
 
-        # victory and defeat
+        # victory and defeat. Countdown missions use the on-screen mission timer (game seconds) and event 14
+        # "mission timer expired", together with local 3 so that the event cannot count before the timer runs.
         $minutes = if ($ms.minutes) { [int]$ms.minutes } else { 0 }
+        $timerDone = @([TSExt.MissionBuilder]::Ev(14, 0), [TSExt.MissionBuilder]::Ev(36, 3))
         switch ([string]$ms.type) {
             'survival' {
-                $mb.AddTrigger('Survived', $playerHouse, 0, @([TSExt.MissionBuilder]::Ev(47, $minutes * 60)), @([TSExt.MissionBuilder]::Act(1, $pIdx))) | Out-Null
+                $mb.AddTrigger('Survived', $playerHouse, 0, $timerDone, @([TSExt.MissionBuilder]::Act(1, $pIdx))) | Out-Null
             }
             'defense' {
-                $mb.AddTrigger('Held out', $playerHouse, 0, @([TSExt.MissionBuilder]::Ev(47, $minutes * 60)), @([TSExt.MissionBuilder]::Act(1, $pIdx))) | Out-Null
+                $mb.AddTrigger('Held out', $playerHouse, 0, $timerDone, @([TSExt.MissionBuilder]::Act(1, $pIdx))) | Out-Null
                 $prot = $playerBase | Where-Object { $_.Type -eq [string]$ms.protect } | Select-Object -First 1
                 if ($prot) {
                     $tid = $mb.AddTrigger('Protected building lost', $playerHouse, 0, @([TSExt.MissionBuilder]::Ev(48, 0)), @([TSExt.MissionBuilder]::Act(2, $pIdx)))
@@ -296,18 +305,20 @@ foreach ($camp in $catalog.campaigns) {
             }
         }
         if ($ms.player.base -eq 'none') {
-            $mb.AddTrigger('Strike team lost', $playerHouse, 0, @([TSExt.MissionBuilder]::Ev(9, $pIdx)), @([TSExt.MissionBuilder]::Act(2, $pIdx))) | Out-Null
+            $mb.AddTrigger('Strike team lost', $playerHouse, 0, @([TSExt.MissionBuilder]::Ev(11, $pIdx)), @([TSExt.MissionBuilder]::Act(2, $pIdx))) | Out-Null
         }
         else {
-            $mb.AddTrigger('Player destroyed', $playerHouse, 0, @([TSExt.MissionBuilder]::Ev(10, $pIdx)), @([TSExt.MissionBuilder]::Act(2, $pIdx))) | Out-Null
+            $mb.AddTrigger('Player destroyed', $playerHouse, 0, @([TSExt.MissionBuilder]::Ev(11, $pIdx)), @([TSExt.MissionBuilder]::Act(2, $pIdx))) | Out-Null
         }
         $timer = if ($ms.timeLimit) { [int]$ms.timeLimit } else { $minutes }
         if ($ms.timeLimit) {
-            $mb.AddTrigger('Time is up', $playerHouse, 0, @([TSExt.MissionBuilder]::Ev(47, [int]$ms.timeLimit * 60)), @([TSExt.MissionBuilder]::Act(2, $pIdx))) | Out-Null
+            $mb.AddTrigger('Time is up', $playerHouse, 0, $timerDone, @([TSExt.MissionBuilder]::Act(2, $pIdx))) | Out-Null
         }
         if ($timer -gt 0) {
-            # on-screen countdown (mission timer, in seconds)
-            $mb.AddTrigger('Countdown', $playerHouse, 0, @([TSExt.MissionBuilder]::Ev(47, 1)), @([TSExt.MissionBuilder]::Act(27, $timer * 60), [TSExt.MissionBuilder]::Act(23, 0))) | Out-Null
+            # on-screen countdown (mission timer, game seconds), then local 3 = "timer is running"
+            $mb.SetVariable(3, 'Countdown running')
+            $mb.AddTrigger('Countdown', $playerHouse, 0, @([TSExt.MissionBuilder]::Ev(47, 1)),
+                @([TSExt.MissionBuilder]::Act(27, $timer * 60), [TSExt.MissionBuilder]::Act(23, 0), [TSExt.MissionBuilder]::Act(56, 3))) | Out-Null
         }
 
         # basic settings
@@ -354,4 +365,5 @@ foreach ($camp in $catalog.campaigns) {
 [IO.File]::WriteAllBytes((Join-Path $OutDir 'BATTLEX.INI'), $bi.ToBytes())
 $built | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $OutDir 'missions-built.json') -Encoding UTF8
 "campaign list: BATTLEX.INI ($($no - 1) entries), $($built.Count) missions in $OutDir"
+
 
