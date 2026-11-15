@@ -1,0 +1,197 @@
+{
+  "comment": "Missions of the Tiberian Sun Extensions. Each mission is built at install time from an official multiplayer map of your own installation (terrain), plus our houses, bases, units and triggers. Types: conquest, survival, commando, defense, economy. 'enemies'/'allies': list of {strength} (small|medium|large|waves); start points are chosen automatically (enemies far away, allies near). Times in minutes.",
+  "campaigns": [
+    {
+      "id": "TSXGDI",
+      "name": { "de": "Erweiterung - GDI: Operation Morgenröte", "en": "Extension - GDI: Operation Dawn" },
+      "missions": [
+        {
+          "file": "TSXG01", "map": "ACCESS", "type": "conquest", "side": "GDI",
+          "enemies": [ { "strength": "small" } ], "allies": [],
+          "player": { "base": "small", "credits": 100, "units": "4,E1|2,E2|3,SMECH|2,MMCH" },
+          "name": { "de": "Brückenkopf", "en": "Beachhead" },
+          "briefing": {
+            "de": "Kommandant, die Bruderschaft von Nod hat in diesem Tal einen Stützpunkt errichtet.@@Bauen Sie Ihre Basis aus und zerstören Sie alle Gebäude von Nod.",
+            "en": "Commander, the Brotherhood of Nod has set up a base in this valley.@@Expand your base and destroy every Nod structure."
+          }
+        },
+        {
+          "file": "TSXG02", "map": "TERRACE", "type": "economy", "side": "GDI", "goalCredits": 40000,
+          "enemies": [ { "strength": "medium" } ], "allies": [],
+          "player": { "base": "small", "credits": 50, "units": "4,E1|2,MEDIC|3,SMECH|2,MMCH|1,HVR" },
+          "name": { "de": "Tiberium-Fieber", "en": "Tiberium Fever" },
+          "briefing": {
+            "de": "Die Terrassen sind reich an Tiberium. GDI braucht Geld für die nächste Offensive.@@Sammeln Sie 40 000 Credits - oder vernichten Sie die Basis von Nod, die Ihnen das Tiberium streitig macht.",
+            "en": "The terraces are rich in Tiberium. GDI needs money for the next offensive.@@Collect 40,000 credits - or destroy the Nod base that competes for the Tiberium."
+          }
+        },
+        {
+          "file": "TSXG03", "map": "G_KNOLL", "type": "survival", "side": "GDI", "minutes": 20, "night": true,
+          "enemies": [ { "strength": "waves" }, { "strength": "waves" }, { "strength": "waves" } ], "allies": [],
+          "player": { "base": "large", "credits": 150, "units": "6,E1|4,E2|2,MEDIC|4,SMECH|4,MMCH|2,HVR" },
+          "name": { "de": "Die lange Nacht", "en": "The Long Night" },
+          "briefing": {
+            "de": "Nod greift im Schutz der Dunkelheit aus drei Richtungen an.@@Halten Sie Ihre Basis 20 Minuten lang, bis die Verstärkung eintrifft.",
+            "en": "Nod attacks under cover of darkness from three sides.@@Hold your base for 20 minutes until reinforcements arrive."
+          }
+        },
+        {
+          "file": "TSXG04", "map": "CLIFFSIN", "type": "commando", "side": "GDI", "target": "NATMPL",
+          "enemies": [ { "strength": "medium" } ], "allies": [],
+          "player": { "base": "none", "credits": 0, "units": "1,GHOST|2,UMAGON|4,JUMPJET|2,MEDIC|4,MMCH|2,SONIC|1,HMEC" },
+          "name": { "de": "Geisterjagd", "en": "Ghost Hunt" },
+          "briefing": {
+            "de": "Ein Einsatztrupp unter Führung des Ghost Stalkers ist hinter den feindlichen Linien gelandet.@@Zerstören Sie den Tempel von Nod. Verstärkung gibt es keine.",
+            "en": "A strike team led by the Ghost Stalker has landed behind enemy lines.@@Destroy the Temple of Nod. There will be no reinforcements."
+          }
+        },
+        {
+          "file": "TSXG05", "map": "SUP_BH_R", "type": "conquest", "side": "GDI", "ionStorms": true,
+          "enemies": [ { "strength": "large" }, { "strength": "large" }, { "strength": "medium" } ], "allies": [ { "strength": "medium" } ],
+          "player": { "base": "medium", "credits": 150, "units": "4,E1|2,E2|2,MEDIC|4,SMECH|4,MMCH|2,HVR|2,JUGG" },
+          "name": { "de": "Morgenröte", "en": "Dawn" },
+          "briefing": {
+            "de": "Die Entscheidungsschlacht. Drei Basen von Nod halten die Ebene, Ionenstürme ziehen auf.@@Eine verbündete GDI-Basis unterstützt Sie. Zerstören Sie alle Gebäude von Nod.",
+            "en": "The decisive battle. Three Nod bases hold the plain, and ion storms are coming.@@An allied GDI base supports you. Destroy every Nod structure."
+          }
+        }
+      ]
+    },
+    {
+      "id": "TSXNOD",
+      "name": { "de": "Erweiterung - Nod: Kanes Erbe", "en": "Extension - Nod: Kane's Legacy" },
+      "missions": [
+        {
+          "file": "TSXN01", "map": "SEISMIC", "type": "conquest", "side": "Nod",
+          "enemies": [ { "strength": "small" } ], "allies": [],
+          "player": { "base": "small", "credits": 100, "units": "4,E1|2,E3|3,BGGY|2,BIKE|2,TTNK" },
+          "name": { "de": "Erwachen", "en": "Awakening" },
+          "briefing": {
+            "de": "Die GDI hat einen Vorposten in unserem Gebiet errichtet. Kane wünscht, dass er verschwindet.@@Zerstören Sie alle Gebäude der GDI.",
+            "en": "GDI has built an outpost in our territory. Kane wishes it gone.@@Destroy every GDI structure."
+          }
+        },
+        {
+          "file": "TSXN02", "map": "PENTAGRM", "type": "commando", "side": "Nod", "target": "GACNST",
+          "enemies": [ { "strength": "medium" } ], "allies": [],
+          "player": { "base": "none", "credits": 0, "units": "1,CYC2|4,CYBORG|2,ENGINEER|4,STNK|2,SUBTANK|2,ART2" },
+          "name": { "de": "Schatten", "en": "Shadows" },
+          "briefing": {
+            "de": "Getarnt und lautlos. Ihr Trupp hat das Gelände der GDI erreicht.@@Zerstören Sie den Bauhof der GDI.",
+            "en": "Cloaked and silent, your squad has reached the GDI compound.@@Destroy the GDI Construction Yard."
+          }
+        },
+        {
+          "file": "TSXN03", "map": "HEXTREME", "type": "defense", "side": "Nod", "minutes": 25, "protect": "NATMPL",
+          "enemies": [ { "strength": "medium" }, { "strength": "waves" } ], "allies": [],
+          "player": { "base": "large", "credits": 150, "units": "6,E1|4,E3|4,CYBORG|4,TTNK|2,ART2|2,STNK" },
+          "name": { "de": "Belagerung im Eis", "en": "Siege on the Ice" },
+          "briefing": {
+            "de": "Die GDI hat unseren Tempel im Eis entdeckt.@@Der Tempel von Nod muss 25 Minuten lang stehen bleiben. Verlieren Sie ihn, ist die Mission gescheitert.",
+            "en": "GDI has found our temple on the ice.@@The Temple of Nod must stand for 25 minutes. If it falls, the mission fails."
+          }
+        },
+        {
+          "file": "TSXN04", "map": "MUTANTS", "type": "economy", "side": "Nod", "goalCredits": 60000,
+          "enemies": [ { "strength": "medium" }, { "strength": "medium" } ], "allies": [],
+          "player": { "base": "medium", "credits": 50, "units": "4,E1|2,E3|2,CYBORG|3,BGGY|3,TTNK" },
+          "name": { "de": "Tiberium-Kriege", "en": "Tiberium Wars" },
+          "briefing": {
+            "de": "Diese Felder gehören Kane. Zwei Basen der GDI sehen das anders.@@Sammeln Sie 60 000 Credits für die Bruderschaft - oder zerstören Sie beide Basen der GDI.",
+            "en": "These fields belong to Kane. Two GDI bases disagree.@@Collect 60,000 credits for the Brotherhood - or destroy both GDI bases."
+          }
+        },
+        {
+          "file": "TSXN05", "map": "FORESTFR", "type": "conquest", "side": "Nod", "night": true,
+          "enemies": [ { "strength": "large" }, { "strength": "large" }, { "strength": "medium" }, { "strength": "medium" } ], "allies": [ { "strength": "medium" } ],
+          "player": { "base": "medium", "credits": 200, "units": "6,E1|4,E3|4,CYBORG|1,CYC2|4,TTNK|2,ART2|3,STNK" },
+          "name": { "de": "Kanes Triumph", "en": "Kane's Triumph" },
+          "briefing": {
+            "de": "Vier Basen der GDI stehen zwischen Kane und dem Sieg. Die Nacht ist unser Verbündeter, ebenso eine zweite Nod-Basis.@@Zerstören Sie alle Gebäude der GDI.",
+            "en": "Four GDI bases stand between Kane and victory. The night is our ally, and so is a second Nod base.@@Destroy every GDI structure."
+          }
+        }
+      ]
+    },
+    {
+      "id": "TSXC1",
+      "name": { "de": "Herausforderung: Die Flut (Überleben 30 Min)", "en": "Challenge: The Flood (survive 30 min)" },
+      "missions": [
+        {
+          "file": "TSXC01", "map": "ICECLIFF", "type": "survival", "side": "GDI", "minutes": 30,
+          "enemies": [ { "strength": "waves" }, { "strength": "waves" }, { "strength": "waves" }, { "strength": "waves" }, { "strength": "medium" } ], "allies": [],
+          "player": { "base": "large", "credits": 200, "units": "8,E1|4,E2|2,MEDIC|6,SMECH|4,MMCH|2,HVR|2,JUGG" },
+          "name": { "de": "Die Flut", "en": "The Flood" },
+          "briefing": {
+            "de": "Welle um Welle. Vier Angriffsgruppen und eine Basis von Nod.@@Überleben Sie 30 Minuten.",
+            "en": "Wave after wave: four strike groups and a Nod base.@@Survive for 30 minutes."
+          }
+        }
+      ]
+    },
+    {
+      "id": "TSXC2",
+      "name": { "de": "Herausforderung: Alle gegen einen (5 Gegner)", "en": "Challenge: All Against One (5 enemies)" },
+      "missions": [
+        {
+          "file": "TSXC02", "map": "RIVRRAD4", "type": "conquest", "side": "Nod",
+          "enemies": [ { "strength": "medium" }, { "strength": "medium" }, { "strength": "medium" }, { "strength": "large" }, { "strength": "large" } ], "allies": [],
+          "player": { "base": "medium", "credits": 250, "units": "6,E1|4,E3|4,CYBORG|1,CYC2|4,TTNK|4,BIKE|2,ART2" },
+          "name": { "de": "Alle gegen einen", "en": "All Against One" },
+          "briefing": {
+            "de": "Fünf Basen der GDI. Eine Basis von Nod.@@Zerstören Sie alle Gebäude der GDI.",
+            "en": "Five GDI bases. One Nod base.@@Destroy every GDI structure."
+          }
+        }
+      ]
+    },
+    {
+      "id": "TSXC3",
+      "name": { "de": "Herausforderung: Blitzkrieg (25 Min)", "en": "Challenge: Blitz (25 min)" },
+      "missions": [
+        {
+          "file": "TSXC03", "map": "TACTICAL", "type": "conquest", "side": "GDI", "timeLimit": 25,
+          "enemies": [ { "strength": "medium" }, { "strength": "medium" } ], "allies": [],
+          "player": { "base": "medium", "credits": 200, "units": "4,E1|2,E2|4,SMECH|4,MMCH|2,HVR|2,JUGG" },
+          "name": { "de": "Blitzkrieg", "en": "Blitz" },
+          "briefing": {
+            "de": "Zwei Basen von Nod. 25 Minuten.@@Zerstören Sie alle Gebäude von Nod, bevor die Zeit abläuft.",
+            "en": "Two Nod bases. 25 minutes.@@Destroy every Nod structure before time runs out."
+          }
+        }
+      ]
+    },
+    {
+      "id": "TSXC4",
+      "name": { "de": "Herausforderung: Wirtschaftswunder (100 000 Credits)", "en": "Challenge: Economic Miracle (100,000 credits)" },
+      "missions": [
+        {
+          "file": "TSXC04", "map": "STORMS", "type": "economy", "side": "GDI", "goalCredits": 100000, "ionStorms": true,
+          "enemies": [ { "strength": "medium" }, { "strength": "medium" }, { "strength": "small" } ], "allies": [],
+          "player": { "base": "medium", "credits": 50, "units": "4,E1|2,E2|4,SMECH|2,MMCH" },
+          "name": { "de": "Wirtschaftswunder", "en": "Economic Miracle" },
+          "briefing": {
+            "de": "Ionenstürme, drei Gegner und ein Ziel: 100 000 Credits.@@Oder zerstören Sie alle Gebäude von Nod.",
+            "en": "Ion storms, three enemies and one goal: 100,000 credits.@@Or destroy every Nod structure."
+          }
+        }
+      ]
+    },
+    {
+      "id": "TSXC5",
+      "name": { "de": "Herausforderung: Eiswüste (Riesenkarte, 6 Gegner)", "en": "Challenge: Ice Desert (huge map, 6 enemies)" },
+      "missions": [
+        {
+          "file": "TSXC05", "map": "TREAD_L", "type": "conquest", "side": "GDI",
+          "enemies": [ { "strength": "medium" }, { "strength": "medium" }, { "strength": "medium" }, { "strength": "large" }, { "strength": "large" }, { "strength": "large" } ], "allies": [ { "strength": "medium" } ],
+          "player": { "base": "large", "credits": 300, "units": "6,E1|4,E2|2,MEDIC|4,SMECH|4,MMCH|4,HVR|2,JUGG|1,HMEC" },
+          "name": { "de": "Eiswüste", "en": "Ice Desert" },
+          "briefing": {
+            "de": "Die grösste Schlacht: sechs Basen von Nod auf einer Eiskarte, eine verbündete GDI-Basis.@@Zerstören Sie alle Gebäude von Nod.",
+            "en": "The biggest battle: six Nod bases on an ice map, one allied GDI base.@@Destroy every Nod structure."
+          }
+        }
+      ]
+    }
+  ]
+}

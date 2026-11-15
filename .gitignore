@@ -1,0 +1,7 @@
+# Only our own code and docs: no game files and no analysis data.
+# Local analysis data: Ghidra project, copy of the exe, extracted game files, screenshots, test maps, backups.
+/analysis/
+# Missions are built from your own game files (src/build-campaigns.ps1).
+/src/missions/
+*.log
+*.err

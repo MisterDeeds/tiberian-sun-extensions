@@ -1,0 +1,42 @@
+TIBERIAN SUN - ERWEITERUNGEN 1.0.0
+==================================
+
+Fan-Projekt für Command & Conquer Tiberian Sun und Feuersturm (Steam).
+https://github.com/MisterDeeds/tiberian-sun-extensions
+
+SPIELEN
+1. "Tiberian Sun - Erweiterungen" starten (Desktop oder Startmenü).
+2. Vorlage oder eigene Optionen wählen, "Spiel starten" klicken.
+3. Im Spiel auf dem ersten Bildschirm "Feuersturm" anklicken.
+
+RIESIGE WELTEN
+Gefecht > Mehrspieler-Karte > Zufallskarte. Kartenbreite und Kartenhöhe auf "Sehr groß" stellen.
+Mit der Option "Zufallskarten-Grösse: riesig" werden die Karten 200 bis 235 Felder breit und hoch,
+mit "gross" bis 220 (Original: höchstens 175, mit 4 Spielern 128).
+
+SCHARFE GRAFIK
+Standard ist die Bildschirmauflösung: das Spiel wird 1:1 gezeichnet statt gestreckt, und du siehst viel mehr
+von der Karte. Nach dem Spiel wird die vorherige Auflösung wieder eingetragen.
+
+NEUE KAMPAGNEN
+Neuer Feldzug > "Erweiterung - GDI: Operation Morgenröte", "Erweiterung - Nod: Kanes Erbe" oder eine
+"Herausforderung". Der Schwierigkeitsgrad bestimmt Grösse und Häufigkeit der Angriffswellen.
+Die Missionen wurden bei der Installation aus den Karten deines Spiels gebaut ("Missionen neu bauen" im
+Startfenster baut sie erneut).
+
+WAS WO GEÄNDERT WIRD
+- Regel-Optionen: EXPAND99.MIX im Spielordner, nur solange das Spiel läuft.
+- Zufallskarten-Grösse und Seitenleisten-Fix: nur im Arbeitsspeicher des laufenden Spiels.
+- Kampagnen: TSX*.MAP und BATTLEX.INI im Spielordner.
+- Auflösung: [Video] in SUN.INI, nach dem Spiel zurückgestellt.
+Keine Originaldatei wird verändert. Ein Start über Steam ist immer das Original.
+
+ENTFERNEN
+Windows-Einstellungen > Apps > "Tiberian Sun - Erweiterungen", oder uninstall.cmd aus dem Download.
+
+HINWEISE
+- Getestet mit Game.exe 2.03 TUC (Steam). Bei einer anderen Version werden die Speicher-Patches übersprungen.
+- Die Regel-Optionen gelten für Feuersturm-Spiele (Gefecht im Feuersturm-Modus, Feuersturm-Missionen,
+  die neuen Kampagnen).
+- Nur für das Einzelspiel.
+- Technische Details: docs\FINDINGS.md
