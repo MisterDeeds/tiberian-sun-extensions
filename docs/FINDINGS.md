@@ -184,6 +184,14 @@ Same scheme as the sister project anno1602-extensions (its version 3.3):
   only the button; box off: only the button; after an update: the note once), `get.ps1` through `Invoke-Expression`
   with a ZIP in the layout of a tag archive into a second sandbox (files equal the repository, 15 missions, temp
   folder gone) and with a broken ZIP (message, no exception, the window goes on).
+- **Real run, 2026-11-16 05:35**, after publishing release 1.2.0: the one-line installer (real download from GitHub)
+  installed 1.2.0 over 1.1.0 (which has no update check) and opened the launcher "Tiberian Sun - Erweiterungen
+  1.2.0"; `settings.json` kept its six option values and got `AutoUpdate=1`, `LastVersion=1.2.0`. Then
+  `version.txt` set to `1.1.9` and the launcher started through the desktop shortcut at 05:35:57: it found v1.2.0
+  and ran the update by itself; the installer wrote `version.txt` 1.2.0 at 05:36:02 and the missions at 05:36:04
+  and opened the new launcher at 05:36:04, which showed "Aktualisiert auf Version 1.2.0." with "Was ist neu?"
+  (picture: `docs/images/launcher-de.png`). Afterwards `UpdateTried=1.2.0 2026-11-16`, option values unchanged, no
+  update script and no setup folder left in `%TEMP%`, SUN.INI unchanged, no EXPAND99.MIX in the game folder.
 
 ## Strings, for orientation
 
