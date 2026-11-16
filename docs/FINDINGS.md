@@ -290,6 +290,11 @@ Same scheme as the sister project anno1602-extensions (its version 3.3):
   and opened the new launcher at 05:36:04, which showed "Aktualisiert auf Version 1.2.0." with "Was ist neu?"
   (picture: `docs/images/launcher-de.png`). Afterwards `UpdateTried=1.2.0 2026-11-16`, option values unchanged, no
   update script and no setup folder left in `%TEMP%`, SUN.INI unchanged, no EXPAND99.MIX in the game folder.
+- **First real update, 2026-11-16 08:06**, right after publishing release 1.3.0: the installed 1.2.0 started through
+  the desktop shortcut at 08:06:04 found v1.3.0 and updated itself; `version.txt` 1.3.0 at 08:06:08, the new launcher
+  "Tiberian Sun - Erweiterungen 1.3.0" at 08:06:10 with "Aktualisiert auf Version 1.3.0." and "Was ist neu?". The
+  options in `settings.json` stayed as they were (the two new options start at their defaults), `LastVersion` and
+  `UpdateTried` became 1.3.0, nothing left in `%TEMP%`.
 
 ## Strings, for orientation
 
