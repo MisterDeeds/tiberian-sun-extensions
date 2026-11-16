@@ -1,4 +1,4 @@
-﻿TIBERIAN SUN - EXTENSIONS 1.1.0
+﻿TIBERIAN SUN - EXTENSIONS 1.2.0
 ===============================
 
 Fan project for Command & Conquer Tiberian Sun and Firestorm (Steam).
@@ -35,6 +35,12 @@ WHAT CHANGES WHERE
 - Campaigns: TSX*.MAP and BATTLEX.INI in the game folder.
 - Resolution and game speed: [Video] and [Options] in SUN.INI, set back after the game.
 No original file is changed. A start from Steam is always the original.
+
+UPDATES
+At every start the launcher asks GitHub for the newest version. With "Update automatically" (top right, on by
+default) a newer one is installed at once and the launcher opens again; your settings stay. Never while the game
+runs, at most one try per version and day. Without the check box the button "Update now" appears instead.
+Updating by hand: run the line from the README again.
 
 REMOVE
 Windows Settings > Apps > "Tiberian Sun - Extensions", or uninstall.cmd from the download.

@@ -50,6 +50,11 @@ Der Installer kopiert das Werkzeug nach `%LOCALAPPDATA%\Programs\TSExtensions`, 
 und legt die Verknüpfung **Tiberian Sun - Erweiterungen** auf dem Desktop und im Startmenü an. Entfernen mit
 `uninstall.cmd` oder unter Windows *Einstellungen > Apps*.
 
+**Updates kommen von selbst:** Bei jedem Start fragt der Starter GitHub nach der neusten Version, installiert sie und
+öffnet sich wieder (Häkchen *Automatisch aktualisieren* oben rechts, standardmässig an; nie während das Spiel läuft,
+deine Einstellungen bleiben). Die Versionen 1.0 und 1.1 haben noch keine Update-Prüfung: einmal mit der Zeile oben
+installieren.
+
 ## Spielen
 
 1. **Tiberian Sun - Erweiterungen** starten, eine Vorlage oder eigene Optionen wählen, **Spiel starten** klicken.
@@ -101,7 +106,8 @@ gelesen.
 ## Entwicklung
 
 `tests\test-missions.ps1`, `tests\test-rules.ps1` und `tests\test-install.ps1` prüfen die Missionen, die Regeldatei
-und eine vollständige Installation und Entfernung in einer Sandbox. In `dev\` liegen die Analysewerkzeuge
+und eine vollständige Installation und Entfernung in einer Sandbox, samt der Update-Logik des Starters und dem
+Einzeiler-Installer mit einem ZIP im Aufbau eines GitHub-Releases. In `dev\` liegen die Analysewerkzeuge
 (Ghidra-Skripte, Kartenzeichner, Spiel-Sonde und ein automatischer Missionstest, der das Spiel startet, sich durch die
 Menüs klickt und prüft, dass die Spiellogik läuft).
 

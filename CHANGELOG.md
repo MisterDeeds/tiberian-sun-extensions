@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.2.0 – 2026-11-16
+
+- Automatic updates: at every start the launcher asks GitHub for the newest release. If there is a newer one, it
+  installs it by itself and opens again – settings stay. Check box "Automatisch aktualisieren / Update
+  automatically" at the top right (on by default); without it the button "Update now" appears instead. At most one
+  try per version and day, never while the game runs.
+- After an update the launcher says "Updated to version x.y.z" once, with a button "What is new?" for the release
+  notes.
+- `get.ps1` (the one-line installer) downloads the newest tag, falls back to the release page when the GitHub API
+  is not available, always installs with Windows PowerShell 5.1, waits for Enter after an error when the launcher
+  started it and cleans up its temporary folder even when a virus scanner still holds the files.
+- The installer writes `version.txt` (from this changelog), shows the version in the Apps entry and its closing
+  lines, opens the launcher at the end (`get.ps1`, `install.cmd`) and waits for Enter when uninstalling from
+  Windows Settings > Apps. The installed copy only removes, it no longer installs over itself.
+- The launcher keeps all keys of `settings.json` when it saves (before, saving the options dropped everything
+  else).
+- Versions 1.0.0 and 1.1.0 have no update check: install 1.2.0 once with the line from the README, after that the
+  extensions keep themselves up to date.
+
 ## 1.1.0 – 2026-11-16
 
 - Full-height sidebar: at high resolutions the sidebar now reaches from top to bottom with up to 40 build rows per

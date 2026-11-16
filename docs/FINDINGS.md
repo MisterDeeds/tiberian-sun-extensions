@@ -156,6 +156,35 @@ distorted. In native resolution the game is drawn 1:1. Mouse input arrives in ga
 `WM_LBUTTON*` messages are ignored by the game). The menus are real Win32 dialogs (`#32770`) and can be driven with
 `WM_COMMAND`, `LB_SETCURSEL`, `CB_SETCURSEL` and `TBM_SETPOS`.
 
+## Installation and automatic updates (1.2)
+
+Same scheme as the sister project anno1602-extensions (its version 3.3):
+
+- `get.ps1` (one line: `irm …/main/get.ps1 | iex`) asks `api.github.com/repos/…/releases/latest` for the newest tag
+  (without the API, which allows 60 requests an hour: the `Location` of `github.com/…/releases/latest`), downloads
+  `archive/refs/tags/<tag>.zip`, unpacks it to `%TEMP%\tiberian-sun-extensions-setup-*` and runs `src\install.ps1
+  -StartLauncher` with Windows PowerShell 5.1. Plain ASCII, because the launcher downloads it and runs it as a file,
+  and PowerShell 5.1 reads a file without BOM in the ANSI code page. The temporary folder is deleted up to ten times
+  0.5 s apart (a virus scanner may still hold the unpacked files).
+- `install.ps1` writes `version.txt` (newest `## x.y.z` of `CHANGELOG.md`) into the program folder and the version
+  into the Apps entry (`HKCU\…\Uninstall\TSExtensions`). The copy in the program folder only removes (`-Remove
+  -PauseAtEnd` from the Apps entry).
+- The launcher of an installed copy (`version.txt` present) asks the same API in a background runspace (8 s timeout,
+  redirect as fallback) and polls the result with a WinForms timer. With *Update automatically* (`AutoUpdate` in
+  `settings.json`, on unless `0`) a newer release is installed at once: download `get.ps1` to
+  `%TEMP%\tiberian-sun-extensions-update.ps1`, run it with `-File` and `TSEXT_PAUSE_ON_ERROR=1`, close the launcher;
+  the installer opens the new one, which deletes the downloaded script. Not while the game runs or the launcher waits
+  for it; `UpdateTried` ("1.2.0 2026-11-16", saved before the start) allows one try per version and day.
+- `LastVersion` in `settings.json` older than `version.txt` → "Updated to version x.y.z" once, with a button for the
+  release notes of that tag.
+- Saving the options used to replace `settings.json` with the option values only; since 1.2 every save keeps the
+  other keys.
+- Tests: `tests\test-install.ps1` (49 checks): version.txt and Apps entry, the installed copy refuses to install over
+  itself, the launcher's self-test with `-PreviewUpdate` (older tag: nothing; newer tag: automatic start; same day:
+  only the button; box off: only the button; after an update: the note once), `get.ps1` through `Invoke-Expression`
+  with a ZIP in the layout of a tag archive into a second sandbox (files equal the repository, 15 missions, temp
+  folder gone) and with a broken ZIP (message, no exception, the window goes on).
+
 ## Strings, for orientation
 
 `RULE*.INI` 0x6FE098, `BATTLE*.INI` 0x6FDF88, `RandMap.Map` 0x701D28, `*.MPR` 0x70DE74, `MISSIONS.PKT` 0x70DEA0,

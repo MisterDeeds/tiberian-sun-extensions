@@ -49,6 +49,10 @@ installation (in German on a German Windows, otherwise in English), copies them 
 shortcut **Tiberian Sun - Extensions** on the desktop and in the Start menu. Remove it again with `uninstall.cmd` or
 under Windows *Settings > Apps*.
 
+**Updates come by themselves:** at every start the launcher asks GitHub for the newest version and installs it, then
+opens again (check box *Update automatically* at the top right, on by default; never while the game runs, your
+settings stay). Versions 1.0 and 1.1 have no update check yet: install once with the line above.
+
 ## Play
 
 1. Start **Tiberian Sun - Extensions**, pick a preset or your own options, click **Start game**.
@@ -96,7 +100,8 @@ Nothing of the game is in this repository – only code and documentation. The g
 ## Development
 
 `tests\test-missions.ps1`, `tests\test-rules.ps1` and `tests\test-install.ps1` check the missions, the rules file and
-a complete install/remove in a sandbox. `dev\` has the analysis tools (Ghidra scripts, map renderer, game probe and an
+a complete install/remove in a sandbox, including the launcher's update logic and the one-line installer with a ZIP
+in the layout of a GitHub release. `dev\` has the analysis tools (Ghidra scripts, map renderer, game probe and an
 automatic mission test that starts the game, clicks through the menus and checks that the game logic runs).
 
 Fan project, not affiliated with Electronic Arts. Command & Conquer, Tiberian Sun and Firestorm are trademarks of

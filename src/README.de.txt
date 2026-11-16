@@ -1,4 +1,4 @@
-﻿TIBERIAN SUN - ERWEITERUNGEN 1.1.0
+﻿TIBERIAN SUN - ERWEITERUNGEN 1.2.0
 ==================================
 
 Fan-Projekt für Command & Conquer Tiberian Sun und Feuersturm (Steam).
@@ -37,6 +37,12 @@ WAS WO GEÄNDERT WIRD
 - Kampagnen: TSX*.MAP und BATTLEX.INI im Spielordner.
 - Auflösung und Spieltempo: [Video] und [Options] in SUN.INI, nach dem Spiel zurückgestellt.
 Keine Originaldatei wird verändert. Ein Start über Steam ist immer das Original.
+
+UPDATES
+Bei jedem Start fragt der Starter GitHub nach der neusten Version. Mit "Automatisch aktualisieren" (oben rechts,
+standardmässig an) wird eine neuere gleich installiert, und der Starter öffnet sich wieder; deine Einstellungen
+bleiben. Nie während das Spiel läuft, höchstens ein Versuch pro Version und Tag. Ohne das Häkchen erscheint
+stattdessen der Knopf "Jetzt aktualisieren". Von Hand aktualisieren: die Zeile aus dem README nochmals ausführen.
 
 ENTFERNEN
 Windows-Einstellungen > Apps > "Tiberian Sun - Erweiterungen", oder uninstall.cmd aus dem Download.

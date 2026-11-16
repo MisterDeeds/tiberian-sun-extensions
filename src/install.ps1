@@ -9,6 +9,9 @@
   (English Windows: "Tiberian Sun - Extensions") in the Start menu and on the desktop, plus an entry under
   Windows "Apps" for removal. No original game file is changed.
   -Remove deletes all of it again: our files in the game folder, the program folder, shortcuts, settings, the entry.
+  It also writes version.txt (the newest entry of ..\CHANGELOG.md): the launcher shows it and compares it with the
+  newest release on GitHub to update itself. -StartLauncher opens the launcher at the end (get.ps1, install.cmd),
+  -PauseAtEnd waits for Enter (the "Uninstall" of the Apps entry).
   For tests: -SandboxRoot puts every user folder (programs, settings, desktop, start menu, registry key name) and the
   mission target below that folder; the game itself is only read.
 #>
@@ -17,12 +20,16 @@ param(
     [string]$TargetFolder = (Join-Path $env:LOCALAPPDATA 'Programs\TSExtensions'),
     [switch]$NoShortcuts,
     [string]$GameDir = '',
+    [switch]$StartLauncher,
+    [switch]$PauseAtEnd,
     [Parameter(DontShow)][string]$SandboxRoot
 )
 $ErrorActionPreference = 'Stop'
 $src = $PSScriptRoot
 . (Join-Path $src 'tslib.ps1')
 . (Join-Path $src 'options.ps1')
+function Wait-AtEnd { if ($PauseAtEnd) { try { [void](Read-Host (Txt 'Press Enter to close this window' 'Enter drücken, um dieses Fenster zu schliessen')) } catch { } } }
+trap { Write-Host $_.Exception.Message -ForegroundColor Red; Wait-AtEnd; exit 1 }
 
 $AppData = $env:APPDATA
 $DesktopFolder = [Environment]::GetFolderPath('Desktop')
@@ -65,8 +72,26 @@ if ($Remove) {
         if ($PSCommandPath -notlike "$TargetFolder*") { Remove-Item -LiteralPath $TargetFolder -Recurse -Force -ErrorAction SilentlyContinue }
     }
     (Txt "Removed. Files removed from the game folder: $n" "Entfernt. Dateien aus dem Spielordner entfernt: $n")
+    Wait-AtEnd
     return
 }
+
+# The copy in the program folder is there for removing (Apps entry); it has no CHANGELOG and would install itself over
+# itself. Installing and updating is done by get.ps1 or install.cmd of a downloaded copy.
+if ([IO.Path]::GetFullPath($src).TrimEnd('\') -eq [IO.Path]::GetFullPath($TargetFolder).TrimEnd('\')) {
+    Txt 'This is the installed copy; it can only remove the extensions (-Remove). To update, run the line from the README again.' 'Das ist die installierte Kopie; sie kann die Erweiterungen nur entfernen (-Remove). Zum Aktualisieren die Zeile aus dem README nochmals ausführen.'
+    Wait-AtEnd
+    return
+}
+
+# Version of this copy: the newest entry of ..\CHANGELOG.md ("## 1.2.0 – 2026-11-16").
+$Version = ''
+try {
+    $m = Select-String -LiteralPath (Join-Path (Split-Path -Parent $src) 'CHANGELOG.md') -Pattern '^## (\d+\.\d+\.\d+)' -ErrorAction Stop | Select-Object -First 1
+    if ($m) { $Version = $m.Matches[0].Groups[1].Value }
+}
+catch { }
+if ($Version) { (Txt 'Tiberian Sun - Extensions {0}' 'Tiberian Sun - Erweiterungen {0}') -f $Version }
 
 if (-not $GameDir) { throw (Txt 'Tiberian Sun and Firestorm (Steam) was not found. Install it with Steam first.' 'Tiberian Sun und Feuersturm (Steam) wurde nicht gefunden. Bitte zuerst mit Steam installieren.') }
 (Txt "Game: $GameDir" "Spiel: $GameDir")
@@ -81,6 +106,10 @@ foreach ($f in $ProgramFiles) {
 }
 $docs = Join-Path $src '..\docs'
 if (Test-Path -LiteralPath $docs) { Copy-Item -LiteralPath $docs -Destination (Join-Path $TargetFolder 'docs') -Recurse -Force }
+# The launcher shows the version and compares it with the newest release on GitHub.
+$versionFile = Join-Path $TargetFolder 'version.txt'
+if ($Version) { [IO.File]::WriteAllText($versionFile, $Version, (New-Object Text.UTF8Encoding($false))) }
+elseif (Test-Path -LiteralPath $versionFile) { Remove-Item -LiteralPath $versionFile -Force }
 
 # missions, built from the player's own maps
 (Txt 'Building the campaigns from your maps ...' 'Die Kampagnen werden aus deinen Karten gebaut ...')
@@ -108,13 +137,26 @@ if (-not $NoShortcuts) {
         $lnk.Save()
     }
     New-Item -Path $UninstallKey -Force | Out-Null
-    $uninst = "`"$ps`" -NoProfile -ExecutionPolicy Bypass -File `"$(Join-Path $TargetFolder 'install.ps1')`" -Remove"
-    foreach ($kv in @(@('DisplayName', (Txt 'Tiberian Sun - Extensions' 'Tiberian Sun - Erweiterungen')), @('DisplayVersion', '1.1.0'), @('Publisher', 'Fan project'),
+    $uninst = "`"$ps`" -NoProfile -ExecutionPolicy Bypass -File `"$(Join-Path $TargetFolder 'install.ps1')`" -Remove -PauseAtEnd"
+    foreach ($kv in @(@('DisplayName', (Txt 'Tiberian Sun - Extensions' 'Tiberian Sun - Erweiterungen')), @('DisplayVersion', $(if ($Version) { $Version } else { '0.0.0' })), @('Publisher', 'Fan project'),
             @('InstallLocation', $TargetFolder), @('UninstallString', $uninst), @('DisplayIcon', $icon), @('NoModify', 1), @('NoRepair', 1))) {
         if ($kv[1] -is [int]) { New-ItemProperty -Path $UninstallKey -Name $kv[0] -Value $kv[1] -PropertyType DWord -Force | Out-Null }
         else { New-ItemProperty -Path $UninstallKey -Name $kv[0] -Value $kv[1] -PropertyType String -Force | Out-Null }
     }
     (Txt "Shortcut created: $ShortcutName (desktop and Start menu)" "Verknüpfung erstellt: $ShortcutName (Desktop und Startmenü)")
 }
+''
 (Txt 'Done.' 'Fertig.')
+$name = $ShortcutName -replace '\.lnk$'
+(Txt '  Play:    "{0}" in the Start menu or on the desktop' '  Spielen:       "{0}" im Startmenü oder auf dem Desktop') -f $name
+(Txt '  Update:  by itself - the launcher installs new versions (or run the line from the README again)' '  Aktualisieren: von selbst - der Starter installiert neue Versionen (oder die Zeile aus dem README nochmals ausführen)')
+(Txt '  Remove:  Windows Settings > Apps > "{0}" > Uninstall' '  Entfernen:     Windows-Einstellungen > Apps > "{0}" > Deinstallieren') -f $name
+if ($StartLauncher -and -not $NoShortcuts) {
+    $launch = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', "`"$(Join-Path $TargetFolder 'launcher.ps1')`"")
+    # In a test only the command is printed.
+    if ($SandboxRoot) { 'START ' + ($launch -join ' ') }
+    else { Start-Process -FilePath (Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe') -ArgumentList $launch -WindowStyle Hidden }
+    (Txt 'The launcher is opening - have fun!' 'Der Starter öffnet sich - viel Spass!')
+}
+Wait-AtEnd
 
