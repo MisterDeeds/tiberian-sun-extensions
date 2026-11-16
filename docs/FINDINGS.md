@@ -311,6 +311,22 @@ Same scheme as the sister project anno1602-extensions (its version 3.3):
   "Tiberian Sun - Erweiterungen 1.3.0" at 08:06:10 with "Aktualisiert auf Version 1.3.0." and "Was ist neu?". The
   options in `settings.json` stayed as they were (the two new options start at their defaults), `LastVersion` and
   `UpdateTried` became 1.3.0, nothing left in `%TEMP%`.
+- **Update 1.3.0 → 1.3.1 failed (2026-11-16 20:13)**: the launcher found v1.3.1, saved `UpdateTried`, downloaded
+  get.ps1, called `Start-Process powershell -File …update.ps1` and closed – but no update window ever started (no
+  engine start in the PowerShell event log, version.txt unchanged). Narrowed down with series of starts through
+  Explorer (version.txt set back to 1.3.0 before each try):
+
+  | Start | Launcher | Update started |
+  |---|---|---|
+  | desktop shortcut | released (closes right after `Start-Process`) | 4 of 13 |
+  | own shortcut with the same target, or a byte copy of the desktop shortcut in another folder | released | 12 of 12 |
+  | desktop shortcut | waits 3 s after `Start-Process` (update process alive the whole time) | 10 of 10 |
+
+  So only a start from the desktop is affected (the launcher's console is then hosted by Windows Terminal,
+  `WindowsTerminal.exe -Embedding` + `OpenConsole.exe`, which end with the launcher); the new window dies when the
+  launcher closes in the same moment. 1.3.2 waits until the update process runs (at most 3 s; if it ended without
+  installing – version.txt unchanged – the launcher stays open and offers *Update now*). Older launchers (1.2.0 to
+  1.3.1) keep the race: another start or *Update now* usually works.
 
 ## Strings, for orientation
 

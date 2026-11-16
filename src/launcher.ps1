@@ -423,7 +423,7 @@ function Save-UpdateState {
     try { Save-Settings $u } catch { }
 }
 # Downloads get.ps1 and runs it as a file in a window of its own (it waits for Enter only after an error), then closes
-# the launcher; the installer opens the new one. Settings stay in %APPDATA%\TSExtensions.
+# the launcher once that window really runs; the installer opens the new one. Settings stay in %APPDATA%\TSExtensions.
 function Start-Update {
     Save-UpdateState
     if ($SelfTest) { $script:UpdateLog.Add("download $GetScriptUrl"); return }
@@ -438,7 +438,20 @@ function Start-Update {
         return
     }
     $env:TSEXT_PAUSE_ON_ERROR = '1'
-    Start-Process -FilePath (Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe') -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$UpdateFile`"")
+    # Close only once the update window runs: started from the desktop shortcut, the new window often died when the
+    # launcher closed in the same moment (Windows 11, 2026-11-16: 9 of 13 tries); with 3 s of waiting all tries worked.
+    $updater = $null
+    try { $updater = Start-Process -FilePath (Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe') -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', "`"$UpdateFile`"") -PassThru } catch { }
+    $until = (Get-Date).AddSeconds(3)
+    while ($updater -and -not $updater.HasExited -and (Get-Date) -lt $until) { [System.Windows.Forms.Application]::DoEvents(); Start-Sleep -Milliseconds 100 }
+    # ended within the 3 s: fine if it installed already (version.txt changed), otherwise it did not run
+    $now = ''
+    try { $now = (Get-Content -LiteralPath (Join-Path $PSScriptRoot 'version.txt') -Raw -ErrorAction Stop).Trim() } catch { }
+    if (-not $updater -or ($updater.HasExited -and $now -eq $Version)) {
+        $updateLabel.Text = Txt 'The update window did not start - "Update now" tries again.' 'Das Update-Fenster ist nicht gestartet – „Jetzt aktualisieren“ versucht es nochmals.'
+        $btnUpdate.Visible = $true
+        return
+    }
     $form.Close()
 }
 # Called with the newest release ("v1.2.0"): nothing if it is not newer than this version; otherwise the notice, and

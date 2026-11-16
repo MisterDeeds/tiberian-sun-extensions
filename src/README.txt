@@ -1,4 +1,4 @@
-﻿TIBERIAN SUN - EXTENSIONS 1.3.1
+﻿TIBERIAN SUN - EXTENSIONS 1.3.2
 ===============================
 
 Fan project for Command & Conquer Tiberian Sun and Firestorm (Steam).
