@@ -7,8 +7,8 @@
   window died with it. Now the launcher waits until the update window runs (at most 3 s) and only then closes; if
   the window does not start, it says so and *Update now* tries again. Checked: 10 of 10 updates from the desktop
   shortcut.
-- For copies 1.2.0 to 1.3.1 the old launcher still does the update: if nothing happens, simply start the launcher
-  again or click *Update now* (or run the line from the README).
+- For copies 1.2.0 to 1.3.1 the old launcher still does the update: if nothing happens, open the launcher from the
+  **Start menu** and click *Update now* (worked at once on the test PC), or run the line from the README.
 
 ## 1.3.1 – 2026-11-16
 

@@ -326,7 +326,12 @@ Same scheme as the sister project anno1602-extensions (its version 3.3):
   `WindowsTerminal.exe -Embedding` + `OpenConsole.exe`, which end with the launcher); the new window dies when the
   launcher closes in the same moment. 1.3.2 waits until the update process runs (at most 3 s; if it ended without
   installing – version.txt unchanged – the launcher stays open and offers *Update now*). Older launchers (1.2.0 to
-  1.3.1) keep the race: another start or *Update now* usually works.
+  1.3.1) keep the race.
+- **Real update 1.3.1 → 1.3.2 (20:37–20:39)**: three opens of the desktop shortcut – the first tried and its update
+  window died; the next two only showed *Update now* (one automatic try per version and day). Opened from the
+  Start menu, a click on *Update now* installed 1.3.2 in 5 s ("Aktualisiert auf Version 1.3.2."); options kept.
+- During these series the unauthenticated GitHub API ran out (60 requests an hour); the launcher and get.ps1 fell
+  back to the `releases/latest` redirect and the `archive/refs/tags` download as intended.
 
 ## Strings, for orientation
 
