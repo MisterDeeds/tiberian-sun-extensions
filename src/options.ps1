@@ -55,7 +55,7 @@ function Get-OptionCatalog {
 function Get-Presets {
     return [ordered]@{
         (Txt 'Original' 'Original') = @{ rmgsize = '0' }
-        (Txt 'Everything bigger' 'Alles grösser') = @{ speed = '1'; rmgsize = '2'; terrain = 'flat'; tiberium = '4'; growth = '2'; arsenal = '1'; ai = '1'; buildspeed = '2'; harvester = '1.5'; resolution = 'native' }
+        (Txt 'Everything bigger' 'Alles grösser') = @{ rmgsize = '2'; terrain = 'flat'; tiberium = '4'; growth = '2'; arsenal = '1'; ai = '1'; buildspeed = '2'; harvester = '1.5'; resolution = 'native' }
         (Txt 'Relaxed' 'Gemütlich') = @{ speed = '2'; cost = '0.5'; buildspeed = '3'; tibvalue = '2'; harvester = '2'; power = '2'; growth = '2'; arsenal = '1'; terrain = 'flat'; tiberium = '2' }
         (Txt 'Hard test' 'Harte Probe') = @{ ai = '2'; superweapon = '0.5'; veteran = '2'; chaos = '1'; rmgsize = '1'; terrain = 'rugged' }
         (Txt 'Chaos' 'Chaos') = @{ chaos = '1'; fog = '1'; arsenal = '1'; superweapon = '0.25'; veteran = '4'; strength = '1.5'; rmgsize = '2' }

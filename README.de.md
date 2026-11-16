@@ -24,7 +24,7 @@ Einzelspiel.
 | **Genug Tiberium** | Der Generator gibt jeder Karte gleich viel Tiberium, egal wie gross sie ist – auf einer Riesenkarte ist es dünn verteilt. Option *Zufallskarten-Tiberium*: doppelt oder viermal so viel, in den Feldern und bei jedem Startpunkt (gemessen: 4,5-mal so viele Tiberium-Felder). Mit *Tiberium-Wachstum* wächst es schneller nach. |
 | **Stärkere Gegner** | *Computergegner stark / brutal*: mehr Geld, mehr und frühere Angriffe, harte Verteidigung ihrer Basis – und sie reparieren **alle** beschädigten Gebäude gleichzeitig (das Original repariert eines nach dem anderen und wartet dazwischen) und **verkaufen nie** ihre Gebäude, wenn das Geld knapp wird. |
 | **Scharfe Grafik** | Das Spiel läuft in der nativen Auflösung deines Bildschirms (z. B. 2560 × 1440) – keine verzerrten, unscharfen Pixel mehr, und du siehst viel mehr vom Schlachtfeld. Die Seitenleiste reicht über die ganze Bildschirmhöhe, mit bis zu 40 Bauzeilen (Original: 20 – mehr Zeilen liessen das Spiel abstürzen). |
-| **Spieltempo** | 60, 30 oder 20 Bilder pro Sekunde, oder unbegrenzt. Auf „unbegrenzt“ läuft die Steam-Version mit 120 Bildern/s – achtmal so schnell wie das klassische Tempo. |
+| **Spieltempo** | 60, 30 oder 20 Bilder pro Sekunde, oder unbegrenzt; standardmässig unverändert. Auf „unbegrenzt“ läuft die Steam-Version mit 120 Bildern/s – achtmal so schnell wie das klassische Tempo –, auch auf einer 235 × 235-Karte mit 8 Spielern (gemessen). Mitten im Gefecht: Esc → *Spielsteuerung* → *Spielgeschwindigkeit*. |
 | **Neue Kampagnen** | *Operation Morgenröte* (GDI, 5 Missionen) und *Kanes Erbe* (Nod, 5 Missionen): Eroberung, Überleben, Kommando, Verteidigung und Wirtschaft, mit Gegnerbasen, die wie die Gefechts-KI bauen und angreifen, und Angriffswellen, die mit der Zeit und dem Schwierigkeitsgrad wachsen. |
 | **Herausforderungen** | Die Flut (30 Min überleben), Alle gegen einen (5 Gegner), Blitzkrieg (25 Min), Wirtschaftswunder (100 000 Credits), Eiswüste (Riesenkarte, 6 Gegner). |
 | **Regel-Optionen** | Baukosten, Bautempo, Tiberium-Wert und -Wachstum, Sammler-Ladung, Kraftwerksleistung, Beförderungen, Superwaffen-Ladezeit, Lebenspunkte, erweitertes Arsenal (Umagon, Chamäleon-Spion, Helden bis 3-mal), starke oder brutale Computergegner, Meteoriten und Viszeroiden, Nebel des Krieges. |
@@ -128,7 +128,8 @@ Entfernung in einer Sandbox, samt der Update-Logik des Starters und dem Einzeile
 eines GitHub-Releases. In `dev\` liegen die Analysewerkzeuge: Ghidra-Skripte, Kartenzeichner, Spiel-Sonde, ein
 automatischer Missionstest, der das Spiel startet, sich durch die Menüs klickt und prüft, dass die Spiellogik läuft,
 `rmg-survey.ps1` / `rmg-stats.ps1` (erzeugen Zufallskarten im Spiel und messen Gelände und Tiberium) und
-`launcher-game-test.ps1` (der Starter von Anfang bis Ende).
+`launcher-game-test.ps1` (der Starter von Anfang bis Ende) und `speed-test.ps1` (Bilder pro Sekunde auf einer
+Riesenkarte).
 
 Fan-Projekt, nicht mit Electronic Arts verbunden. Command & Conquer, Tiberian Sun und Firestorm sind Marken von
 Electronic Arts Inc. MIT-Lizenz.

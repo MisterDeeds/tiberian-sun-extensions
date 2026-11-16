@@ -1,4 +1,4 @@
-﻿TIBERIAN SUN - ERWEITERUNGEN 1.3.0
+﻿TIBERIAN SUN - ERWEITERUNGEN 1.3.1
 ==================================
 
 Fan-Projekt für Command & Conquer Tiberian Sun und Feuersturm (Steam).
@@ -32,8 +32,11 @@ Nach dem Spiel wird die vorherige Auflösung wieder eingetragen.
 SPIELTEMPO
 Das Spiel rechnet so viele Bilder pro Sekunde, wie das Spieltempo erlaubt; auf "unbegrenzt" sind das mit der
 Steam-Version bis 120 Bilder/s, alles läuft dann achtmal so schnell wie bei 15 Bilder/s. Die Option
-"Spieltempo" stellt 60, 30 oder 20 Bilder/s ein. Countdown und Angriffswellen der Missionen laufen in
-Spielzeit mit.
+"Spieltempo" stellt 60, 30 oder 20 Bilder/s ein; "unverändert" (Standard, auch bei den Vorlagen "Alles grösser"
+und "Original") lässt das Tempo, wie du es hast. Mitten im Gefecht: Esc > "Spielsteuerung" >
+"Spielgeschwindigkeit" - ganz rechts unbegrenzt, jede Stufe nach links langsamer (60, 30, 20, 15 ... Bilder/s),
+sofort. Riesige Karten bremsen das Spiel nicht (gemessen: 235 x 235 mit 8 Spielern, konstant 120 Bilder/s).
+Countdown und Angriffswellen der Missionen laufen in Spielzeit mit.
 
 NEUE KAMPAGNEN
 Neuer Feldzug > "Erweiterung - GDI: Operation Morgenröte", "Erweiterung - Nod: Kanes Erbe" oder eine

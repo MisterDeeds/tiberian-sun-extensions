@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.3.1 – 2026-11-16
+
+- Preset *Everything bigger* no longer sets the game speed to 60 frames/s – the speed stays as you have it (on
+  "unlimited" the Steam version runs at 120 frames/s, twice as fast as 60).
+- Measured in the game: on a 235 × 235 random map with 8 players (7 computer opponents, flat, 4 × Tiberium) the
+  game ran at a steady 120 frames/s for 8 minutes of heavy fighting – huge worlds do not slow it down.
+- Documented: the speed can be changed during a battle (Esc → *Game controls* → *Game speed*, 7 steps from
+  unlimited to 10 frames/s, takes effect at once); checked in the game at 120, 60 and 20 frames/s.
+- New analysis tool `dev\speed-test.ps1` (frames per second on a huge map, screen pictures, reason if it stops).
+
 ## 1.3.0 – 2026-11-16
 
 - New option *Random map terrain*: **flat** – hardly any hills and cliffs, little water, room for huge bases

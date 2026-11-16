@@ -197,6 +197,22 @@ Firestorm mission.
 - The game logic runs one step per frame. Frames per second by `[Options] GameSpeed` in SUN.INI, measured with the
   frame counter at 0x7E4924: 0 = unlimited (120 with the Steam DDrawCompat limit `FpsLimiter = msgloop(120)`),
   1 = 60, 3 = 20, 4 = 15.
+- GameSpeed lives in the options object at 0x7E4720 (first field; FUN_00589C10 reads `[Options]` of SUN.INI into it).
+  The in-game options dialog (FUN_004AA7B0, Language.dll "Spielgeschwindigkeit") shows it as trackbar 1321 with
+  range 0–6 and position 6 − GameSpeed: far right = 0 (unlimited), one step left = 60 frames/s, then 30, 20, 15 ….
+  On OK FUN_004AA590 writes 6 − position straight into 0x7E4720 in campaign and skirmish games (multiplayer sends an
+  event instead), so the speed can be changed faster or slower during a battle. The skirmish setup dialog has the
+  same slider. The launcher's speed option only sets the start value in SUN.INI ("unchanged" leaves it alone).
+- Checked in the game (2026-11-16, dev\speed-test.ps1 + game-probe steps): Esc opens the in-game menu,
+  "Spielsteuerung" (1313) the dialog above; slider 5 → GameSpeed 1, ~60 frames/s; slider 3 → 3, ~20 frames/s;
+  slider 6 → 0, ~120 frames/s – each right after "Einsatz fortsetzen" (1653). The frame counter stands while the
+  menu is open.
+- Huge maps cost no speed: 215 × 215 with 2 players and 235 × 235 with 8 players (7 computer opponents "strong",
+  flat terrain, 4 × Tiberium, GameSpeed 0) both ran at 120.0 frames/s in every 15/30 s window – 8 minutes in the
+  first 8-player run. The 8-player runs stopped when the AI had destroyed the idle test player: the second run's
+  picture shows the score screen (game time 3:52, the computer players with 16–37 losses each), game responding,
+  no dialog; the first run stopped the same way after about 8 minutes. Window captures (PrintWindow) of the game
+  are black; the tool takes screen pictures (`CopyFromScreen`) instead.
 - Event 13 "Elapsed time", the mission timer (actions 27/25/26, event 14) count **game time** (frames ÷ 15):
   a repeating trigger with 13 = 30 spawned a unit about every 3.7 s at 120 frames/s; a countdown set to 1200 ran
   from 18:32 to 10:31 in one real minute.

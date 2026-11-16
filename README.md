@@ -23,7 +23,7 @@ before; a game started from Steam is always the original. Single player only.
 | **Plenty of Tiberium** | The generator gives a map the same amount of Tiberium however big it is – on a huge map it is thin. Option *Random map Tiberium*: twice or 4 times as much, in the fields and next to every start position (measured: 4.5 times as many Tiberium cells). With *Tiberium growth* it grows back faster. |
 | **Tougher opponents** | *Computer opponents strong / brutal*: more money, more and earlier attacks, a fierce defense of their base – and they repair **every** damaged building at once (the original repairs one at a time and then waits) and **never sell** their buildings when money runs short. |
 | **Sharp graphics** | The game runs in your screen's native resolution (e.g. 2560 × 1440) – no more stretched, blurry pixels, and you see much more of the battlefield. The sidebar fills the whole screen height with up to 40 build rows (original: 20 – more rows crashed the game). |
-| **Game speed** | 60, 30 or 20 frames per second, or unlimited. On "unlimited" the Steam version runs at 120 frames/s – eight times the classic speed. |
+| **Game speed** | 60, 30 or 20 frames per second, or unlimited; by default unchanged. On "unlimited" the Steam version runs at 120 frames/s – eight times the classic speed – also on a 235 × 235 map with 8 players (measured). During a battle: Esc → *Game controls* → *Game speed*. |
 | **New campaigns** | *Operation Dawn* (GDI, 5 missions) and *Kane's Legacy* (Nod, 5 missions): conquest, survival, commando, defense and economy missions with enemy bases that build and attack like the skirmish AI, attack waves that grow with time and difficulty. |
 | **Challenges** | The Flood (survive 30 min), All Against One (5 enemies), Blitz (25 min), Economic Miracle (100,000 credits), Ice Desert (huge map, 6 enemies). |
 | **Rules options** | Build costs, build speed, tiberium value and growth, harvester load, power output, promotions, super weapon charge time, unit hit points, extended arsenal (Umagon, Chameleon spy, heroes up to 3 times), stronger or brutal computer opponents, meteorites and visceroids, fog of war. |
@@ -121,7 +121,8 @@ missions, the rules file, every memory patch against your `Game.exe`, and a comp
 including the launcher's update logic and the one-line installer with a ZIP in the layout of a GitHub release.
 `dev\` has the analysis tools: Ghidra scripts, map renderer, game probe, an automatic mission test that starts the
 game, clicks through the menus and checks that the game logic runs, `rmg-survey.ps1` / `rmg-stats.ps1` (generate
-random maps in the game and measure terrain and Tiberium) and `launcher-game-test.ps1` (the launcher end to end).
+random maps in the game and measure terrain and Tiberium), `launcher-game-test.ps1` (the launcher end to end) and
+`speed-test.ps1` (frames per second on a huge map).
 
 Fan project, not affiliated with Electronic Arts. Command & Conquer, Tiberian Sun and Firestorm are trademarks of
 Electronic Arts Inc. MIT license.
