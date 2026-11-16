@@ -4,7 +4,7 @@
 
 Ein Fan-Projekt für **Command & Conquer Tiberian Sun und Feuersturm** (Steam, Game.exe 2.03 TUC): riesige
 Zufallswelten, scharfe Grafik in der nativen Auflösung deines Bildschirms, 15 neue Missionen in zwei Kampagnen und
-fünf Herausforderungen sowie 16 Optionen für Regeln, Welt und Anzeige, alles in einem Startfenster.
+fünf Herausforderungen sowie 18 Optionen für Regeln, Welt, Gegner und Anzeige, alles in einem Startfenster.
 
 Keine Originaldatei des Spiels wird verändert. Die Erweiterungen arbeiten über Dateien, die das Spiel zusätzlich zu
 seinen eigenen liest (ein zusätzliches Archiv und neue Missionsdateien), und über den Arbeitsspeicher des laufenden
@@ -20,12 +20,19 @@ Einzelspiel.
 | Funktion | Was du bekommst |
 |---|---|
 | **Riesige Zufallswelten** | Der eingebaute Zufallskarten-Generator des Spiels macht Karten bis **235 × 235 Felder** (Original: höchstens 175 × 175, und das nur mit 8 Spielern; mit 4 Spielern 128 × 128) – mit Flüssen, Klippen, Tiberium, Wäldern und Ruinen. |
+| **Flaches Land für riesige Basen** | Option *Zufallskarten-Gelände: flach* – kaum Hügel und Klippen, wenig Wasser: gemessen auf 225 × 225 sind 92 % der Karte bebaubar (mit den üblichen Reglern 59 %), und die grösste ebene Fläche ist 4- bis 16-mal so gross. Oder *zerklüftet*: viele Hochebenen, Hügel und Pässe. |
+| **Genug Tiberium** | Der Generator gibt jeder Karte gleich viel Tiberium, egal wie gross sie ist – auf einer Riesenkarte ist es dünn verteilt. Option *Zufallskarten-Tiberium*: doppelt oder viermal so viel, in den Feldern und bei jedem Startpunkt (gemessen: 4,5-mal so viele Tiberium-Felder). Mit *Tiberium-Wachstum* wächst es schneller nach. |
+| **Stärkere Gegner** | *Computergegner stark / brutal*: mehr Geld, mehr und frühere Angriffe, harte Verteidigung ihrer Basis – und sie reparieren **alle** beschädigten Gebäude gleichzeitig (das Original repariert eines nach dem anderen und wartet dazwischen) und **verkaufen nie** ihre Gebäude, wenn das Geld knapp wird. |
 | **Scharfe Grafik** | Das Spiel läuft in der nativen Auflösung deines Bildschirms (z. B. 2560 × 1440) – keine verzerrten, unscharfen Pixel mehr, und du siehst viel mehr vom Schlachtfeld. Die Seitenleiste reicht über die ganze Bildschirmhöhe, mit bis zu 40 Bauzeilen (Original: 20 – mehr Zeilen liessen das Spiel abstürzen). |
 | **Spieltempo** | 60, 30 oder 20 Bilder pro Sekunde, oder unbegrenzt. Auf „unbegrenzt“ läuft die Steam-Version mit 120 Bildern/s – achtmal so schnell wie das klassische Tempo. |
 | **Neue Kampagnen** | *Operation Morgenröte* (GDI, 5 Missionen) und *Kanes Erbe* (Nod, 5 Missionen): Eroberung, Überleben, Kommando, Verteidigung und Wirtschaft, mit Gegnerbasen, die wie die Gefechts-KI bauen und angreifen, und Angriffswellen, die mit der Zeit und dem Schwierigkeitsgrad wachsen. |
 | **Herausforderungen** | Die Flut (30 Min überleben), Alle gegen einen (5 Gegner), Blitzkrieg (25 Min), Wirtschaftswunder (100 000 Credits), Eiswüste (Riesenkarte, 6 Gegner). |
 | **Regel-Optionen** | Baukosten, Bautempo, Tiberium-Wert und -Wachstum, Sammler-Ladung, Kraftwerksleistung, Beförderungen, Superwaffen-Ladezeit, Lebenspunkte, erweitertes Arsenal (Umagon, Chamäleon-Spion, Helden bis 3-mal), starke oder brutale Computergegner, Meteoriten und Viszeroiden, Nebel des Krieges. |
-| **Vorlagen** | Original, Alles grösser, Gemütlich, Harte Probe, Chaos. |
+| **Vorlagen** | Original, Alles grösser (riesig, flach, Tiberium × 4), Gemütlich, Harte Probe (zerklüftet, brutal), Chaos. |
+
+<p align="center">
+  <img src="docs/images/random-map-flat.png" alt="Zwei Zufallskarten mit 225 x 225 Feldern und gleichem Seed: links die üblichen Regler, rechts flaches Gelände mit vierfachem Tiberium" width="80%">
+</p>
 
 <p align="center">
   <img src="docs/images/launcher-de.png" alt="Startfenster" width="48%">
@@ -60,7 +67,8 @@ installieren.
 1. **Tiberian Sun - Erweiterungen** starten, eine Vorlage oder eigene Optionen wählen, **Spiel starten** klicken.
 2. Im Spiel auf dem ersten Bildschirm **Feuersturm** anklicken.
 3. **Riesige Welten:** Gefecht > Mehrspieler-Karte > Zufallskarte, Kartenbreite und -höhe *Sehr groß*
-   (mit der Option *riesig*: 200–235 Felder pro Seite; *gross*: bis 220).
+   (mit der Option *riesig*: 200–235 Felder pro Seite; *gross*: bis 220). Mit den Optionen *Gelände* und *Tiberium*
+   stehen die Regler dort auf deren Werten; du kannst sie weiter verschieben.
 4. **Neue Kampagnen:** Neuer Feldzug > einen Eintrag mit *Erweiterung* oder *Herausforderung* wählen.
    Der Schwierigkeitsgrad bestimmt Grösse und Häufigkeit der feindlichen Angriffswellen.
 
@@ -78,6 +86,15 @@ Messungen im Spiel stehen in [docs/FINDINGS.md](docs/FINDINGS.md).
   2 × 40 Zeilen: Es schreibt die 11 Befehle um, die seine Adresse enthalten, verdoppelt den Spaltenabstand an den
   7 Stellen, die „Zeile + Spalte × 20“ rechnen, und begrenzt die Höhe der Seitenleiste auf 40 Zeilen. Dann
   funktioniert jede Auflösung bis 2160 Pixel Höhe, mit einer Seitenleiste von oben bis unten.
+- **Zufallskarten-Gelände und -Tiberium** – die Regler des Zufallskarten-Dialogs zeigen Felder des
+  Generator-Objekts im Speicher (beim Spielstart Spieler 2, alles andere 0); das Werkzeug setzt sie, bevor du den
+  Dialog öffnest. Der Generator verteilt `(Tiberium-Regler × 30 + 2500) × Spieler` Felder Tiberium auf
+  `Felder-Regler ÷ 10 + Spieler + 3` Felder, dazu etwa 500 bei jedem Startpunkt – unabhängig von der Kartengrösse.
+  Zwei kleine Hooks vervielfachen beide Mengen.
+- **Computergegner** – Regelwerte, die das Spiel wirklich verwendet (mehrere `[AI]`-Einträge liest es zwar, verwendet
+  sie aber nie, z. B. `PowerEmergency`, `BaseSizeAdd`, `WarLimit`), und ein Speicher-Patch: Ein Computerhaus beginnt
+  eine Reparatur nur, wenn sein „repariert gerade“-Merker frei ist, also immer nur ein Gebäude; der Patch entfernt
+  diese Prüfung. `[IQ] SellBack=99` beendet das Verkaufen, `CreditReserve=0` lässt sie auch mit wenig Geld reparieren.
 - **Zeiten in Missionen** – Wellen, Countdowns und Zeitlimits laufen in Spielzeit (Spielbilder ÷ 15), wie in den
   Originalmissionen, und folgen damit dem Spieltempo.
 - **Regel-Optionen** – eine geänderte Kopie deiner eigenen `FIRESTRM.INI` kommt in das Archiv `EXPAND99.MIX`. Das
@@ -105,11 +122,13 @@ gelesen.
 
 ## Entwicklung
 
-`tests\test-missions.ps1`, `tests\test-rules.ps1` und `tests\test-install.ps1` prüfen die Missionen, die Regeldatei
-und eine vollständige Installation und Entfernung in einer Sandbox, samt der Update-Logik des Starters und dem
-Einzeiler-Installer mit einem ZIP im Aufbau eines GitHub-Releases. In `dev\` liegen die Analysewerkzeuge
-(Ghidra-Skripte, Kartenzeichner, Spiel-Sonde und ein automatischer Missionstest, der das Spiel startet, sich durch die
-Menüs klickt und prüft, dass die Spiellogik läuft).
+`tests\test-missions.ps1`, `tests\test-rules.ps1`, `tests\test-patches.ps1` und `tests\test-install.ps1` prüfen die
+Missionen, die Regeldatei, jeden Speicher-Patch gegen deine `Game.exe` und eine vollständige Installation und
+Entfernung in einer Sandbox, samt der Update-Logik des Starters und dem Einzeiler-Installer mit einem ZIP im Aufbau
+eines GitHub-Releases. In `dev\` liegen die Analysewerkzeuge: Ghidra-Skripte, Kartenzeichner, Spiel-Sonde, ein
+automatischer Missionstest, der das Spiel startet, sich durch die Menüs klickt und prüft, dass die Spiellogik läuft,
+`rmg-survey.ps1` / `rmg-stats.ps1` (erzeugen Zufallskarten im Spiel und messen Gelände und Tiberium) und
+`launcher-game-test.ps1` (der Starter von Anfang bis Ende).
 
 Fan-Projekt, nicht mit Electronic Arts verbunden. Command & Conquer, Tiberian Sun und Firestorm sind Marken von
 Electronic Arts Inc. MIT-Lizenz.

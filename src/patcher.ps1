@@ -1,4 +1,4 @@
-# Memory patches for the running game (Game.exe 2.03 TUC, Steam). Every patch checks the original bytes first and
+﻿# Memory patches for the running game (Game.exe 2.03 TUC, Steam). Every patch checks the original bytes first and
 # writes only if they match ("verify, then patch"); nothing on disk is changed, and everything is back to normal
 # when the game ends. Dot-source after tslib.ps1.
 
@@ -91,6 +91,63 @@ function Invoke-SidebarFix($gp) {
     return $log
 }
 
+# Random map dialog: its sliders show, and the generator uses, int fields of the generator object 0x805E10
+# (FUN_0053ABB0 sets the sliders from them, FUN_0053A8C0 reads them back on OK). They are 0 when the game starts
+# (players 2, Tiberium 1); RandMap.Sed is not read when the dialog opens. Setting the fields gives other start values,
+# the player can still move every slider.
+#   RegionSize "Klippen"/cliffs: size of the plateaus (bigger = fewer cliffs), Ruggedness "Berge": hills,
+#   Accessibility "Zugänge": ramps, Tiberium "Tiberiummenge", TiberiumLayout "Tiberiumfelder": number of fields.
+$script:RmgFields = [ordered]@{
+    Ruggedness = 0x38; WaterAmount = 0x40; Players = 0x44; Tiberium = 0x48; TiberiumLayout = 0x4C; Vegetation = 0x50
+    UrbanPresence = 0x54; Accessibility = 0x60; RegionSize = 0x64
+}
+$script:RmgObject = 0x805E10
+$script:TerrainSliders = @{
+    flat   = [ordered]@{ RegionSize = 100; Ruggedness = 0; Accessibility = 100; WaterAmount = 5; Vegetation = 25; UrbanPresence = 10 }
+    rugged = [ordered]@{ RegionSize = 0; Ruggedness = 90; Accessibility = 30; WaterAmount = 30; Vegetation = 60; UrbanPresence = 30 }
+}
+
+# Writes start values of random map sliders. Checks first that the object looks like it should (players 2..8, every
+# slider 0..100), otherwise writes nothing.
+function Set-RmgSliders($gp, $values, [string]$name) {
+    $players = $gp.ReadInt([uint32]($script:RmgObject + $script:RmgFields.Players))
+    if ($players -lt 2 -or $players -gt 8) { return "RMG sliders ${name}: unexpected object (players $players)" }
+    foreach ($k in $values.Keys) {
+        $v = $gp.ReadInt([uint32]($script:RmgObject + $script:RmgFields[$k]))
+        if ($v -lt 0 -or $v -gt 100) { return "RMG sliders ${name}: unexpected object ($k = $v)" }
+    }
+    foreach ($k in $values.Keys) { $gp.Write([uint32]($script:RmgObject + $script:RmgFields[$k]), [BitConverter]::GetBytes([int]$values[$k])) }
+    return ("RMG sliders {0}: {1}" -f $name, (($values.GetEnumerator() | ForEach-Object { "$($_.Key)=$($_.Value)" }) -join ' '))
+}
+
+# Random map generator, Tiberium (FUN_00546600): every Tiberium field gets
+# (Tiberium slider * 30 + 2500) * players / fields cells, computed at 0x54661E .. 0x54662B
+# (LEA EAX,[EAX+EAX*2]; LEA EDX,[EAX+EAX*4]; LEA EAX,[EDX+EDX*1+0x9C4]; IMUL EAX,[EBX+0x44]) - the same amount on a
+# 50 x 50 map and on a 235 x 235 map. Then every player gets a field next to the start position of
+# (distance term) + 500 cells (ADD EAX,0x1F4 at 0x5468AF). Both hooks multiply the amount by a factor that lives in
+# memory next to the code.
+$script:TibHookAt = 0x546624
+$script:TibHookOrig = [byte[]](0x8D, 0x84, 0x12, 0xC4, 0x09, 0x00, 0x00)
+$script:TibStartHookAt = 0x5468AF
+$script:TibStartHookOrig = [byte[]](0x05, 0xF4, 0x01, 0x00, 0x00)
+
+# Returns the result line; $script:TibFactorAddress is the address of the factor (tests change it between maps).
+function Install-TiberiumFactor($gp, [int]$factor) {
+    $var = $gp.Alloc(16)
+    $gp.Write($var, [BitConverter]::GetBytes([int]$factor))
+    $imul = [byte[]](@(0x0F, 0xAF, 0x05) + [BitConverter]::GetBytes([uint32]$var))      # IMUL EAX,dword ptr [var]
+    $r1 = $gp.InstallHook([uint32]$script:TibHookAt, $script:TibHookOrig, [byte[]]($script:TibHookOrig + $imul))
+    $r2 = $gp.InstallHook([uint32]$script:TibStartHookAt, $script:TibStartHookOrig, [byte[]]($script:TibStartHookOrig + $imul))
+    if ($r1 -eq 'patched') { $script:TibFactorAddress = $var }
+    return ('RMG Tiberium x{0}: fields {1}, start fields {2}' -f $factor, $r1, $r2)
+}
+
+# Computer opponents repair only one building at a time: BuildingClass AI (FUN_00435540) starts a repair only if the
+# house flag +0x118 is clear, sets it and clears it again after a random delay. Skipping the test (JNZ at 0x4355D0)
+# lets them repair every damaged building at once. Selling ([IQ] SellBack) and the money check (CreditReserve) stay
+# rules values (see options.ps1).
+$script:RepairPatch = @{ At = 0x4355D0; Orig = [byte[]](0x0F, 0x85, 0x4D, 0x01, 0x00, 0x00); New = [byte[]](0x90, 0x90, 0x90, 0x90, 0x90, 0x90) }
+
 function ConvertTo-IntBytes([int[]]$values) {
     $b = New-Object byte[] ($values.Count * 4)
     for ($i = 0; $i -lt $values.Count; $i++) { [Array]::Copy([BitConverter]::GetBytes([int]$values[$i]), 0, $b, $i * 4, 4) }
@@ -111,6 +168,18 @@ function Invoke-GamePatches($gp, $settings) {
             $r = $gp.VerifyPatch([uint32]$script:RmgTables[$t[0]], $t[1], $t[2])
             $log.Add("RMG $($t[0]): $r")
         }
+    }
+    $terrain = $script:TerrainSliders[[string]$settings['terrain']]
+    if ($terrain) { $log.Add((Set-RmgSliders $gp $terrain ([string]$settings['terrain']))) }
+    $tib = [string]$settings['tiberium']
+    if ($tib -match '^\d+$' -and [int]$tib -gt 1) {
+        # sliders "Tiberiummenge" and "Tiberiumfelder" to the right (they start at 1 and 0), then the factor
+        $log.Add((Set-RmgSliders $gp ([ordered]@{ Tiberium = 100; TiberiumLayout = 100 }) 'Tiberium'))
+        $log.Add((Install-TiberiumFactor $gp ([int]$tib)))
+    }
+    if ([string]$settings['ai'] -match '^[12]$') {
+        $r = $gp.VerifyPatch([uint32]$script:RepairPatch.At, $script:RepairPatch.Orig, $script:RepairPatch.New)
+        $log.Add("AI repair: $r")
     }
     return $log
 }

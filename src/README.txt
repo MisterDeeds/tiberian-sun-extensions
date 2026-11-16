@@ -1,4 +1,4 @@
-﻿TIBERIAN SUN - EXTENSIONS 1.2.0
+﻿TIBERIAN SUN - EXTENSIONS 1.3.0
 ===============================
 
 Fan project for Command & Conquer Tiberian Sun and Firestorm (Steam).
@@ -13,6 +13,15 @@ HUGE WORLDS
 Skirmish > Multiplayer map > Random map. Set map width and height to "Very large".
 With the option "Random map size: huge" maps are 200 to 235 cells wide and high, with "large" up to 220
 (original: at most 175, with 4 players 128).
+"Random map terrain: flat" - hardly any hills and cliffs, little water: room for huge bases (92 % of the map
+buildable instead of 59 %); "rugged" - many plateaus, hills and passes.
+"Random map Tiberium: twice / 4 times as much" - the generator gives a map the same amount of Tiberium however
+big it is; the option multiplies it, in the fields and next to every start position.
+The sliders of the random map dialog start at these values; you can still move them.
+
+TOUGHER OPPONENTS
+"Computer opponents: strong / brutal" - more money, earlier and bigger attacks, a fierce defense of their base;
+they repair every damaged building at once (the original repairs one at a time) and never sell their buildings.
 
 SHARP GRAPHICS
 The default is your screen resolution: the game is drawn 1:1 instead of stretched, and you see much more of the
@@ -31,7 +40,8 @@ maps of your game ("Rebuild missions" in the start window builds them again).
 
 WHAT CHANGES WHERE
 - Rules options: EXPAND99.MIX in the game folder, only while the game runs.
-- Random map size and sidebar fix: only in the memory of the running game.
+- Random maps (size, terrain sliders, Tiberium), repairs of the computer opponents and sidebar fix: only in the
+  memory of the running game.
 - Campaigns: TSX*.MAP and BATTLEX.INI in the game folder.
 - Resolution and game speed: [Video] and [Options] in SUN.INI, set back after the game.
 No original file is changed. A start from Steam is always the original.

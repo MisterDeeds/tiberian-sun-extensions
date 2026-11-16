@@ -1,5 +1,24 @@
 # Changelog
 
+## 1.3.0 – 2026-11-16
+
+- New option *Random map terrain*: **flat** – hardly any hills and cliffs, little water, room for huge bases
+  (measured on 225 × 225: 92 % of the map buildable instead of 59 %, largest flat area 4 to 16 times as big) – or
+  **rugged** – many plateaus, hills and passes. The sliders of the random map dialog start at these values (they
+  start at 0 in the original game) and can still be moved.
+- New option *Random map Tiberium*: twice or 4 times as much. The generator gives a map the same amount of Tiberium
+  however big it is; the option multiplies it, in the fields and next to every start position, and puts the
+  Tiberium sliders to the right (measured: 4.5 times as many Tiberium cells).
+- *Computer opponents strong / brutal*: they now repair **every** damaged building at once (the original repairs
+  one at a time and then waits – memory patch), **never sell** their buildings, repair even with little money,
+  keep more defense teams and answer attacks on their base faster and harder.
+- Fixed: *Tiberium growth fast / very fast* made Tiberium grow **slower** (the game's Growth and Spread values are
+  waiting times; they were multiplied instead of divided).
+- Presets: *Everything bigger* now with flat terrain, 4 × Tiberium and faster growth; *Relaxed* flat with
+  2 × Tiberium; *Hard test* rugged.
+- New test `tests\test-patches.ps1` (every memory patch against your Game.exe) and the analysis tools
+  `dev\rmg-survey.ps1`, `dev\rmg-stats.ps1` and `dev\launcher-game-test.ps1`.
+
 ## 1.2.0 – 2026-11-16
 
 - Automatic updates: at every start the launcher asks GitHub for the newest release. If there is a newer one, it

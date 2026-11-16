@@ -5,7 +5,7 @@
 .DESCRIPTION
   "Start game" writes the rules options as EXPAND99.MIX into the game folder (a changed copy of your own
   FIRESTRM.INI), sets the resolution in SUN.INI if wanted, starts Game.exe, applies the memory patches (random map
-  size) and removes the rules file again when the game ends. "Start original" starts the game without any change.
+  size, terrain sliders and Tiberium, repairs of the computer opponents) and puts everything back when the game ends. "Start original" starts the game without any change.
   -DryRun: everything except starting the game. -SelfTest: builds the window, clicks through the presets and tabs,
   checks the generated rules file and closes again (for tests/test-install.ps1).
   Updates (installed copy only, version.txt): at every start a background request asks GitHub for the newest release;
@@ -231,7 +231,7 @@ $hint = New-Object System.Windows.Forms.Label
 $hint.AutoSize = $false; $hint.Size = New-Object System.Drawing.Size 770, 64
 $hint.Location = New-Object System.Drawing.Point 14, ([math]::Max($rowY[0], $rowY[1]) + 12)
 $hint.ForeColor = $cDim
-$hint.Text = Txt 'In the game, click "Firestorm" on the first screen. Huge worlds: Skirmish > Multiplayer map > Random map, map width and height "Very large" (up to 235 x 235 cells with "huge"). The options apply to skirmish games and campaigns; everything is undone when the game ends, so a game started from Steam is always the original.' 'Im Spiel auf dem ersten Bildschirm "Feuersturm" anklicken. Riesige Welten: Gefecht > Mehrspieler-Karte > Zufallskarte, Kartenbreite und -höhe "Sehr groß" (mit "riesig" bis 235 × 235 Felder). Die Optionen gelten für Gefechte und Kampagnen; nach dem Spiel ist alles wieder wie vorher, ein Start über Steam ist immer das Original.'
+$hint.Text = Txt 'In the game, click "Firestorm" on the first screen. Huge worlds: Skirmish > Multiplayer map > Random map, map width and height "Very large" (up to 235 x 235 cells with "huge"; terrain and Tiberium as chosen above, the sliders there can still be moved). The options apply to skirmish games and campaigns; everything is undone when the game ends, so a game started from Steam is always the original.' 'Im Spiel auf dem ersten Bildschirm "Feuersturm" anklicken. Riesige Welten: Gefecht > Mehrspieler-Karte > Zufallskarte, Kartenbreite und -höhe "Sehr groß" (mit "riesig" bis 235 × 235 Felder; Gelände und Tiberium wie oben gewählt, die Regler dort lassen sich weiter verschieben). Die Optionen gelten für Gefechte und Kampagnen; nach dem Spiel ist alles wieder wie vorher, ein Start über Steam ist immer das Original.'
 $tabPlay.Controls.Add($hint)
 
 function Get-UiSettings {
@@ -317,7 +317,7 @@ $info.Text = @(
     ''
     (Txt 'What changes where:' 'Was wo geändert wird:')
     (Txt '- Rules options: EXPAND99.MIX in the game folder while the game runs (a changed copy of your FIRESTRM.INI; Firestorm mode).' '- Regel-Optionen: EXPAND99.MIX im Spielordner, solange das Spiel läuft (geänderte Kopie deiner FIRESTRM.INI; Feuersturm-Modus).')
-    (Txt '- Random map size: memory of the running game only.' '- Zufallskarten-Grösse: nur der Arbeitsspeicher des laufenden Spiels.')
+    (Txt '- Random maps (size, terrain sliders, Tiberium), repairs of the computer opponents: memory of the running game only.' '- Zufallskarten (Grösse, Gelände-Regler, Tiberium), Reparaturen der Computergegner: nur der Arbeitsspeicher des laufenden Spiels.')
     (Txt '- Campaigns: TSX*.MAP and BATTLEX.INI in the game folder (removed by the uninstaller).' '- Kampagnen: TSX*.MAP und BATTLEX.INI im Spielordner (der Deinstaller entfernt sie).')
     (Txt '- Resolution and game speed: [Video] and [Options] in SUN.INI, only if you choose it, set back after the game.' '- Auflösung und Spieltempo: [Video] und [Options] in SUN.INI, nur wenn du es wählst, nach dem Spiel zurückgestellt.')
     ''
@@ -523,6 +523,7 @@ $form.Add_Shown({
             $out += "update row: shown=$($updateLabel.Visible) text=[$($updateLabel.Text)] update button=$($btnUpdate.Visible) news button=$($btnNews.Visible) started=[$($script:UpdateLog -join ', ')]"
             if ($PreviewImage) {
                 $tabs.SelectedIndex = 0; $form.Refresh()
+                if ($presetButtons.Count -gt 1) { $presetButtons[1].PerformClick(); $form.Refresh() }     # "Everything bigger" (needs its tab in front)
                 $image = New-Object System.Drawing.Bitmap($form.Width, $form.Height)
                 $form.DrawToBitmap($image, (New-Object System.Drawing.Rectangle(0, 0, $form.Width, $form.Height)))
                 $image.Save($PreviewImage, [System.Drawing.Imaging.ImageFormat]::Png); $image.Dispose()

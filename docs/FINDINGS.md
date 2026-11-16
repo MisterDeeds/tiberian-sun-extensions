@@ -100,6 +100,68 @@ Firestorm mission.
 - Result in `0x805E10 + 0x100` (width) and `+0x104` (height). Checked: with the patched tables and 4 players,
   "Sehr groß" gives 225 × 225, the battle starts and runs.
 
+### Sliders, terrain and Tiberium (1.3)
+
+- Dialog template: Language.dll, dialog 107 (Firestorm) / 101. Sliders (trackbars, range 0–100) and the fields of
+  the generator object they show (FUN_0053ABB0 sets them from the fields, FUN_0053A8C0 reads them back on OK):
+
+  | Label | Control | Field | RandMap.Sed key |
+  |---|---|---|---|
+  | Spieler | 1003 | `+0x44` (2–8) | NumPlayers |
+  | Klippen | 1021 | `+0x64` | RegionSize |
+  | Zugänge | 1020 | `+0x60` | Accessibility |
+  | Berge | 1001 | `+0x38` | Ruggedness |
+  | Tiberiummenge | 1016 | `+0x48` (1–100) | Tiberium |
+  | Tiberiumfelder | 1015 | `+0x4C` | TiberiumLayout |
+  | Gewässer | 1008 | `+0x40` | WaterAmount |
+  | Vegetation | 1012 | `+0x50` | Vegetation |
+  | Stadtruinen | 1013 | `+0x54` | UrbanPresence |
+  | Kratermonster | 1023 | `+0xF0` (0–5) | VeinholeMonsters |
+
+  Seed `+0x68` (the Firestorm dialog has no seed field). The fields are 0 when the game starts (players 2,
+  Tiberium 1) and keep their values for the session. `RandMap.Sed` (reader 0x53C6F0, writer near 0x53C456) is written
+  by the game on OK but **not** read when the dialog opens (checked: file with other values, dialog still at 0).
+- "Klippen" is the region size: regions with more cells than
+  `(RegionSize × 0.005 + 0.05) × [0x805F14] × [0x805F10] × 2` are split again (FUN_00533AD0, 0x533C99; borders
+  between regions of different height become cliffs), so a **higher** value means **fewer** cliffs.
+- Tiberium (FUN_00546600): number of fields `TiberiumLayout × 0.01 × 10 + players + 3` (FUN_005397D0); each field
+  gets `(Tiberium × 30 + 2500) × players / fields` cells plus a random ±100 (0x54661E: `LEA`s, `IMUL [EBX+0x44]`,
+  `IDIV`); then every player a field near the start position of `(distance term) + 500` (`ADD EAX,0x1F4` at
+  0x5468AF). FUN_005468F0 grows a field of that many cells (array of `n × 0x50` bytes). None of it depends on the map
+  size. `+0xF5` = Tiberium > 0.75 (blue Tiberium with Firestorm). `0x6B2330` is `__ftol`, not a random function.
+- Measured (dev\rmg-survey.ps1 + dev\rmg-stats.ps1; 4 players, "Sehr groß" = 225 × 225 cells, seed 4711; the survey
+  patches the OK path to write the full map to RandMap.Map: JZ 0x53A620 and JZ 0x5DE18B → NOPs; seed fixed):
+
+  | Sliders (Klippen/Zugänge/Berge/Tib./Felder/Wasser/Veg./Ruinen), factor | Cliff | Ramp/hill | Water | Buildable | Largest flat area | Tiberium cells |
+  |---|---|---|---|---|---|---|
+  | 50/50/40/60/60/30/60/30 | 3.0 % | 20.9 % | 12.1 % | 58.7 % | 8,545 | 1,729 |
+  | Klippen 0 | 4.9 % | 24.5 % | 12.2 % | 53.6 % | 5,046 | 1,938 |
+  | Klippen 100 | 2.3 % | 24.7 % | 12.2 % | 55.8 % | 4,588 | 1,841 |
+  | **flat** 100/100/0/60/60/5/25/10 | 2.2 % | 0.3 % | 1.1 % | 91.8 % | 35,628 | 1,856 |
+  | rugged 0/30/90/60/60/30/60/30 | 4.9 % | 32.6 % | 12.1 % | 45.2 % | 3,554 | 2,042 |
+  | Tiberium 100, Felder 100 | 3.0 % | 20.0 % | 12.2 % | 59.2 % | – | 2,349 |
+  | factor 2 | 3.0 % | 21.9 % | 12.2 % | 56.4 % | – | 3,261 |
+  | factor 4 | 3.0 % | 20.1 % | 12.1 % | 55.1 % | – | 6,160 |
+  | flat, Tiberium 100/100, factor 4 (fields and start fields) | 2.2 % | 0.3 % | 1.1 % | 85.6 % | 34,122 | 8,576 |
+
+  Seed 90210: usual sliders 55.5 % buildable, largest flat area 3,612; flat 91.5 %, 56,566. Each map took 5–6 s,
+  the battle on the last one runs.
+- Option *Random map terrain* writes the slider fields (flat: RegionSize 100, Ruggedness 0, Accessibility 100,
+  WaterAmount 5, Vegetation 25, UrbanPresence 10; rugged: 0 / 90 / 30 / 30 / 60 / 30). Option *Random map
+  Tiberium* (× 2, × 4) sets Tiberium and TiberiumLayout to 100 and hooks 0x546624 and 0x5468AF with
+  `IMUL EAX,[factor]`.
+
+### Tiberium growth
+
+- FUN_00645DC0 (growth) and FUN_00645330 (spread) run for every Tiberium type when the scenario has
+  `[Basic] TiberiumGrowthEnabled=yes` (`Scen+0x1D82`; random maps write yes). The next step comes after the type's
+  `Growth` (`+0x70`) resp. `Spread` (`+0x64`) frames – for growth × 0.3 if `[SpecialFlags] TiberiumGrows` (bit 5 of
+  `Scen+0`) is set, × 1 otherwise (random maps: not set). `GrowthPercentage` (`+0x78`) of the cells grow per step,
+  5 to 50. So **smaller** Growth/Spread = faster.
+- `[General] GrowthRate` (`+0xDD8`), `TiberiumGrows` and `TiberiumSpreads` are read (or not even that) but never used;
+  `[MultiplayerDefaults] TiberiumGrows` (`+0xF5B`) is stored but never used.
+- Versions 1.0–1.2 made *Tiberium growth: fast* slower (they multiplied Growth and Spread); 1.3 divides them.
+
 ## Sidebar and high resolutions
 
 - Sidebar rectangle `0x74C240` x, `0x74C244` y, `0x74C248` width (168), `0x74C24C` height (= screen height − 148).
@@ -155,6 +217,42 @@ SUN.INI resolution 1920 × 1200 is stretched to 16:9 screens non-uniformly (× 1
 distorted. In native resolution the game is drawn 1:1. Mouse input arrives in game coordinates (real mouse;
 `WM_LBUTTON*` messages are ignored by the game). The menus are real Win32 dialogs (`#32770`) and can be driven with
 `WM_COMMAND`, `LB_SETCURSEL`, `CB_SETCURSEL` and `TBM_SETPOS`.
+
+## Computer opponents (1.3)
+
+Rules keys and where Game.exe keeps them (rules object `0x74C488`; [General] FUN_005C9630, [AI] FUN_005CCC70,
+[IQ] FUN_005CDEB0). Which ones are used was checked with a scan for every instruction that reads the offset:
+
+| Key | Offset | Used by |
+|---|---|---|
+| [General] MultiplayerAICM | vector at `+0xB50` | scenario start FUN_005DD290 (0x5DD42E): money of a computer house = `AICM[difficulty] × 0.01 × starting credits` – only the starting money, no income bonus |
+| [General] AIAlternateProductionCreditCutoff | `+0xB4C` | house production FUN_004C9CB0 |
+| [AI] ComputerBaseDefenseResponse | `+0x758` | FUN_006367D0 (0x63681C) |
+| [AI] CreditReserve | `+0xEF8` | building AI FUN_00435540 |
+| [IQ] RepairSell / SellBack | `+0xC1C` / `+0xC34` | building AI FUN_00435540 |
+| [AI] PowerEmergency, BaseSizeAdd, PowerSurplus, RefineryLimit, BarracksLimit, WarLimit, DefenseLimit | `+0x918`, `+0x998`, `+0x99C`, `+0x98C`, `+0x988`, `+0x978`, `+0x968` | **nothing** – read and stored, never used (Red Alert relics) |
+
+Building AI (FUN_00435540, every damaged building of a computer house with IQ ≥ RepairSell):
+
+- Money below CreditReserve → sell the building, if it may be sold by the AI, the house IQ ≥ SellBack, a random
+  0–50 is below the IQ and its health is red.
+- Otherwise → start a repair, but only if the house flag `+0x118` is clear. Starting a repair sets the flag and a
+  random delay (house `+0x154` frame, `+0x15C` delay); only after it the next building gets repaired. So a computer
+  house repairs **one building at a time**.
+
+What the option *Computer opponents* (strong / brutal) does:
+
+- Rules: more starting money (AICM 350/300/200 resp. 600/500/400 %), shorter team delays, higher team caps, more
+  defense teams (Minimum 5/4/3 resp. 6/5/4), faster and stronger answer to attacks on the base (BaseDefenseDelay
+  0.15 / 0.08 min, ComputerBaseDefenseResponse 4 / 6), spending cutoff 1500 / 500, `CreditReserve=0` (always the
+  repair branch), `[IQ] SellBack=99` (above MaxIQLevels 5: never sells).
+- Memory patch: the `JNZ` at 0x4355D0 that tests the flag `+0x118` becomes six NOPs – every damaged building is
+  repaired at once (repairs still cost money and stop when the money is gone).
+- Checked in the game (dev\launcher-game-test.ps1, 2026-11-16): the launcher with *brutal*, *flat* and *Tiberium × 4*
+  started the game; in memory the repair patch (six NOPs), both Tiberium hooks and the slider fields; the random map
+  dialog opened with Klippen 100, Zugänge 100, Berge 0, Gewässer 5, Vegetation 25, Ruinen 10; in the battle the rules
+  object had SellBack 99, CreditReserve 0, ComputerBaseDefenseResponse 6; the battle ran 3 minutes (frame 4643 →
+  22758); afterwards SUN.INI was identical and EXPAND99.MIX gone.
 
 ## Installation and automatic updates (1.2)
 

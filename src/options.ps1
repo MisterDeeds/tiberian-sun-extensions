@@ -34,11 +34,15 @@ function Get-OptionCatalog {
         @{ Id = 'arsenal'; Group = (Txt 'Combat' 'Kampf'); Label = (Txt 'Extended arsenal' 'Erweitertes Arsenal'); Default = '0'
             Choices = @(@('0', (Txt 'off' 'aus')), @('1', (Txt 'on: Umagon, Chameleon spy; heroes up to 3 times' 'an: Umagon, Chamäleon-Spion; Helden bis 3-mal'))) }
         @{ Id = 'ai'; Group = (Txt 'Enemies' 'Gegner'); Label = (Txt 'Computer opponents' 'Computergegner'); Default = '0'
-            Choices = @(@('0', (Txt 'original' 'Original')), @('1', (Txt 'strong: more money, attacks sooner' 'stark: mehr Geld, greifen früher an')), @('2', (Txt 'brutal: much more money, big teams' 'brutal: viel mehr Geld, grosse Teams'))) }
+            Choices = @(@('0', (Txt 'original' 'Original')), @('1', (Txt 'strong: more money, attack sooner, defend their base, repair everything at once, never sell' 'stark: mehr Geld, greifen früher an, verteidigen ihre Basis, reparieren alles gleichzeitig, verkaufen nie')), @('2', (Txt 'brutal: much more money, big teams, fierce base defense, repair everything, never sell' 'brutal: viel mehr Geld, grosse Teams, harte Basisverteidigung, reparieren alles, verkaufen nie'))) }
         @{ Id = 'chaos'; Group = (Txt 'Enemies' 'Gegner'); Label = (Txt 'Meteorites and visceroids' 'Meteoriten und Viszeroiden'); Default = '0'
             Choices = @(@('0', (Txt 'original' 'Original')), @('1', (Txt 'on' 'an'))) }
         @{ Id = 'rmgsize'; Group = (Txt 'World' 'Welt'); Label = (Txt 'Random map size' 'Zufallskarten-Grösse'); Default = '1'
             Choices = @(@('0', (Txt 'original (50-175 cells)' 'Original (50-175 Felder)')), @('1', (Txt 'large (up to 220)' 'gross (bis 220)')), @('2', (Txt 'huge (200-235)' 'riesig (200-235)'))) }
+        @{ Id = 'terrain'; Group = (Txt 'World' 'Welt'); Label = (Txt 'Random map terrain' 'Zufallskarten-Gelände'); Default = 'keep'
+            Choices = @(@('keep', (Txt 'as set in the game' 'wie im Spiel eingestellt')), @('flat', (Txt 'flat: hardly any cliffs and hills, room for huge bases' 'flach: kaum Klippen und Hügel, Platz für riesige Basen')), @('rugged', (Txt 'rugged: many cliffs, hills and plateaus' 'zerklüftet: viele Klippen, Hügel und Hochebenen'))) }
+        @{ Id = 'tiberium'; Group = (Txt 'World' 'Welt'); Label = (Txt 'Random map Tiberium' 'Zufallskarten-Tiberium'); Default = '1'
+            Choices = @(@('1', (Txt 'original amount' 'Original-Menge')), @('2', (Txt 'twice as much' 'doppelt so viel')), @('4', (Txt '4 times as much: big fields' 'viermal so viel: grosse Felder'))) }
         @{ Id = 'fog'; Group = (Txt 'World' 'Welt'); Label = (Txt 'Fog of war' 'Nebel des Krieges'); Default = '0'
             Choices = @(@('0', (Txt 'original' 'Original')), @('1', (Txt 'on' 'an'))) }
         @{ Id = 'speed'; Group = (Txt 'Display' 'Anzeige'); Label = (Txt 'Game speed' 'Spieltempo'); Default = 'keep'
@@ -51,9 +55,9 @@ function Get-OptionCatalog {
 function Get-Presets {
     return [ordered]@{
         (Txt 'Original' 'Original') = @{ rmgsize = '0' }
-        (Txt 'Everything bigger' 'Alles grösser') = @{ speed = '1'; rmgsize = '2'; arsenal = '1'; ai = '1'; buildspeed = '2'; harvester = '1.5'; resolution = 'native' }
-        (Txt 'Relaxed' 'Gemütlich') = @{ speed = '2'; cost = '0.5'; buildspeed = '3'; tibvalue = '2'; harvester = '2'; power = '2'; growth = '2'; arsenal = '1' }
-        (Txt 'Hard test' 'Harte Probe') = @{ ai = '2'; superweapon = '0.5'; veteran = '2'; chaos = '1'; rmgsize = '1' }
+        (Txt 'Everything bigger' 'Alles grösser') = @{ speed = '1'; rmgsize = '2'; terrain = 'flat'; tiberium = '4'; growth = '2'; arsenal = '1'; ai = '1'; buildspeed = '2'; harvester = '1.5'; resolution = 'native' }
+        (Txt 'Relaxed' 'Gemütlich') = @{ speed = '2'; cost = '0.5'; buildspeed = '3'; tibvalue = '2'; harvester = '2'; power = '2'; growth = '2'; arsenal = '1'; terrain = 'flat'; tiberium = '2' }
+        (Txt 'Hard test' 'Harte Probe') = @{ ai = '2'; superweapon = '0.5'; veteran = '2'; chaos = '1'; rmgsize = '1'; terrain = 'rugged' }
         (Txt 'Chaos' 'Chaos') = @{ chaos = '1'; fog = '1'; arsenal = '1'; superweapon = '0.25'; veteran = '4'; strength = '1.5'; rmgsize = '2' }
     }
 }
@@ -109,9 +113,10 @@ function New-RulesFile($fs, $settings) {
     if ($f -ne 1) { foreach ($t in 'HARV', 'WEED') { Scale $t 'Storage' $f $true 1 } }
     $f = & $num 'growth'
     if ($f -ne 1) {
-        Scale 'General' 'GrowthRate' (1 / $f) $false 0.2
-        $out.Set('General', 'TiberiumGrows', 'yes'); $out.Set('General', 'TiberiumSpreads', 'yes')
-        if ($rules['Tiberiums']) { foreach ($t in $rules['Tiberiums'].Values()) { Scale $t 'Growth' $f $true 1; Scale $t 'Spread' $f $true 1 } }
+        # Growth and Spread of each Tiberium type are the frames between two growth / spread steps (FUN_00645DC0,
+        # FUN_00645330), so faster means smaller. [General] GrowthRate, TiberiumGrows and TiberiumSpreads are never
+        # used by the game (growth runs when the map has [Basic] TiberiumGrowthEnabled=yes; see docs/FINDINGS.md).
+        if ($rules['Tiberiums']) { foreach ($t in $rules['Tiberiums'].Values()) { Scale $t 'Growth' (1 / $f) $true 50; Scale $t 'Spread' (1 / $f) $true 50 } }
     }
     $f = & $num 'power'
     if ($f -ne 1) { foreach ($t in $types) { $p = ConvertTo-Num (Eff $t 'Power'); if ($null -ne $p -and $p -gt 0) { $out.Set($t, 'Power', (Format-Num ($p * $f) $true)) } } }
@@ -133,19 +138,29 @@ function New-RulesFile($fs, $settings) {
         $out.Set('CHAMSPY', 'TechLevel', '6'); $out.Set('CHAMSPY', 'Owner', 'Nod'); $out.Set('CHAMSPY', 'Prerequisite', 'NAHAND,NARADR'); $out.Set('CHAMSPY', 'AllowedToStartInMultiplayer', 'no')
         foreach ($h in 'GHOST', 'CYC2', 'MHIJACK', 'HMEC', 'MOBWARG', 'MOBWARN') { if (Eff $h 'BuildLimit') { $out.Set($h, 'BuildLimit', '3') } }
     }
+    # Computer opponents. Only keys that Game.exe really uses (docs/FINDINGS.md "Computer opponents"): starting money
+    # (MultiplayerAICM, percent per difficulty), team rhythm and limits, defense teams, the answer to attacks on the
+    # base, spending when money is short, and the building AI: never sell ([IQ] SellBack above the highest IQ),
+    # repair even with little money (CreditReserve 0). patcher.ps1 adds "repair all damaged buildings at once".
     switch ([string]$settings['ai']) {
         '1' {
             $out.Set('General', 'MultiplayerAICM', '350,300,200')
             Scale 'AI' 'AttackInterval' 0.6 $false 0.5; Scale 'AI' 'AttackDelay' 0.5 $false 0.5
             $out.Set('General', 'TeamDelays', '1500,1800,2400'); $out.Set('General', 'TotalAITeamCap', '20,18,14')
-            $out.Set('General', 'MaximumAIDefensiveTeams', '8,7,6')
+            $out.Set('General', 'MaximumAIDefensiveTeams', '8,7,6'); $out.Set('General', 'MinimumAIDefensiveTeams', '5,4,3')
+            $out.Set('General', 'BaseDefenseDelay', '.15'); $out.Set('AI', 'ComputerBaseDefenseResponse', '4')
+            $out.Set('General', 'AIAlternateProductionCreditCutoff', '1500')
+            $out.Set('AI', 'CreditReserve', '0'); $out.Set('IQ', 'SellBack', '99')
         }
         '2' {
             $out.Set('General', 'MultiplayerAICM', '600,500,400')
             Scale 'AI' 'AttackInterval' 0.35 $false 0.3; Scale 'AI' 'AttackDelay' 0.25 $false 0.3
             $out.Set('General', 'TeamDelays', '900,1100,1400'); $out.Set('General', 'TotalAITeamCap', '30,26,22')
-            $out.Set('General', 'MaximumAIDefensiveTeams', '10,9,8'); $out.Set('General', 'MinimumAIDefensiveTeams', '5,4,3')
+            $out.Set('General', 'MaximumAIDefensiveTeams', '10,9,8'); $out.Set('General', 'MinimumAIDefensiveTeams', '6,5,4')
             $out.Set('General', 'AIHateDelays', '2400,2000,1800')
+            $out.Set('General', 'BaseDefenseDelay', '.08'); $out.Set('AI', 'ComputerBaseDefenseResponse', '6')
+            $out.Set('General', 'AIAlternateProductionCreditCutoff', '500'); $out.Set('General', 'FillEarliestTeamProbability', '100,100,90')
+            $out.Set('AI', 'CreditReserve', '0'); $out.Set('IQ', 'SellBack', '99')
         }
     }
     if ($settings['chaos'] -eq '1') { $out.Set('General', 'Meteorites', 'yes'); $out.Set('General', 'Visceroids', 'yes') }

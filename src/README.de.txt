@@ -1,4 +1,4 @@
-﻿TIBERIAN SUN - ERWEITERUNGEN 1.2.0
+﻿TIBERIAN SUN - ERWEITERUNGEN 1.3.0
 ==================================
 
 Fan-Projekt für Command & Conquer Tiberian Sun und Feuersturm (Steam).
@@ -13,6 +13,16 @@ RIESIGE WELTEN
 Gefecht > Mehrspieler-Karte > Zufallskarte. Kartenbreite und Kartenhöhe auf "Sehr groß" stellen.
 Mit der Option "Zufallskarten-Grösse: riesig" werden die Karten 200 bis 235 Felder breit und hoch,
 mit "gross" bis 220 (Original: höchstens 175, mit 4 Spielern 128).
+"Zufallskarten-Gelände: flach" - kaum Hügel und Klippen, wenig Wasser: Platz für riesige Basen (92 % der Karte
+bebaubar statt 59 %); "zerklüftet" - viele Hochebenen, Hügel und Pässe.
+"Zufallskarten-Tiberium: doppelt / viermal so viel" - der Generator gibt jeder Karte gleich viel Tiberium, egal
+wie gross sie ist; die Option vervielfacht es, in den Feldern und bei jedem Startpunkt.
+Die Regler im Zufallskarten-Dialog stehen am Anfang auf diesen Werten; du kannst sie weiter verschieben.
+
+STÄRKERE GEGNER
+"Computergegner: stark / brutal" - mehr Geld, frühere und grössere Angriffe, harte Verteidigung ihrer Basis;
+sie reparieren alle beschädigten Gebäude gleichzeitig (das Original repariert eines nach dem anderen) und
+verkaufen ihre Gebäude nie.
 
 SCHARFE GRAFIK
 Standard ist die Bildschirmauflösung: das Spiel wird 1:1 gezeichnet statt gestreckt, und du siehst viel mehr
@@ -33,7 +43,8 @@ Startfenster baut sie erneut).
 
 WAS WO GEÄNDERT WIRD
 - Regel-Optionen: EXPAND99.MIX im Spielordner, nur solange das Spiel läuft.
-- Zufallskarten-Grösse und Seitenleisten-Fix: nur im Arbeitsspeicher des laufenden Spiels.
+- Zufallskarten (Grösse, Gelände-Regler, Tiberium), Reparaturen der Computergegner und Seitenleisten-Fix: nur im
+  Arbeitsspeicher des laufenden Spiels.
 - Kampagnen: TSX*.MAP und BATTLEX.INI im Spielordner.
 - Auflösung und Spieltempo: [Video] und [Options] in SUN.INI, nach dem Spiel zurückgestellt.
 Keine Originaldatei wird verändert. Ein Start über Steam ist immer das Original.

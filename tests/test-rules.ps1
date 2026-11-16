@@ -18,6 +18,8 @@ foreach ($case in @(
         @{ k = 'tibvalue'; v = '3'; s = 'Riparius'; key = 'Value'; f = 3 }
         @{ k = 'harvester'; v = '2'; s = 'HARV'; key = 'Storage'; f = 2 }
         @{ k = 'power'; v = '2'; s = 'GAPOWR'; key = 'Power'; f = 2 }
+        @{ k = 'growth'; v = '2'; s = 'Riparius'; key = 'Growth'; f = 0.5 }    # frames between growth steps
+        @{ k = 'growth'; v = '5'; s = 'Vinifera'; key = 'Spread'; f = 0.2 }    # frames between spread steps
         @{ k = 'veteran'; v = '2'; s = 'General'; key = 'VeteranRatio'; f = 0.5 }
         @{ k = 'superweapon'; v = '0.5'; s = 'IonCannonSpecial'; key = 'RechargeTime'; f = 0.5 }
         @{ k = 'strength'; v = '2'; s = 'MMCH'; key = 'Strength'; f = 2 }
@@ -36,6 +38,18 @@ Check 'arsenal: GHOST BuildLimit 3' ((Eff $out 'GHOST' 'BuildLimit') -eq '3')
 $set = Get-DefaultSettings; $set['ai'] = '2'
 $out = [TSExt.IniFile]::Parse((New-RulesFile $fs $set))
 Check 'ai brutal: MultiplayerAICM' ((Eff $out 'General' 'MultiplayerAICM') -eq '600,500,400')
+foreach ($lvl in '1', '2') {
+    $set = Get-DefaultSettings; $set['ai'] = $lvl
+    $out = [TSExt.IniFile]::Parse((New-RulesFile $fs $set))
+    Check "ai $lvl`: never sell ([IQ] SellBack $((Eff $out 'IQ' 'SellBack')) > MaxIQLevels $((Eff $out 'IQ' 'MaxIQLevels')))" ((Num (Eff $out 'IQ' 'SellBack')) -gt (Num (Eff $out 'IQ' 'MaxIQLevels')))
+    Check "ai $lvl`: repair with little money ([AI] CreditReserve $((Eff $orig 'AI' 'CreditReserve')) -> $((Eff $out 'AI' 'CreditReserve')))" ((Num (Eff $out 'AI' 'CreditReserve')) -eq 0)
+    Check "ai $lvl`: stronger answer to base attacks ([AI] ComputerBaseDefenseResponse $((Eff $orig 'AI' 'ComputerBaseDefenseResponse')) -> $((Eff $out 'AI' 'ComputerBaseDefenseResponse')))" ((Num (Eff $out 'AI' 'ComputerBaseDefenseResponse')) -gt (Num (Eff $orig 'AI' 'ComputerBaseDefenseResponse')))
+    Check "ai $lvl`: more defense teams (MinimumAIDefensiveTeams $((Eff $orig 'General' 'MinimumAIDefensiveTeams')) -> $((Eff $out 'General' 'MinimumAIDefensiveTeams')))" ((Num ((Eff $out 'General' 'MinimumAIDefensiveTeams') -split ',')[0]) -gt (Num ((Eff $orig 'General' 'MinimumAIDefensiveTeams') -split ',')[0]))
+    Check "ai $lvl`: the rest of [IQ] stays (RepairSell $((Eff $out 'IQ' 'RepairSell')))" ((Eff $out 'IQ' 'RepairSell') -eq (Eff $orig 'IQ' 'RepairSell'))
+}
+$set = Get-DefaultSettings; $set['terrain'] = 'flat'; $set['tiberium'] = '4'
+Check 'terrain and Tiberium are no rules options (no EXPAND99.MIX for them alone)' (-not (Test-RulesChanged $set))
+
 foreach ($pn in (Get-Presets).Keys) {
     $set = Get-DefaultSettings; foreach ($k in (Get-Presets)[$pn].Keys) { $set[$k] = (Get-Presets)[$pn][$k] }
     $b = New-RulesFile $fs $set
