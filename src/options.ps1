@@ -35,16 +35,18 @@ function Get-OptionCatalog {
             Choices = @(@('0', (Txt 'off' 'aus')), @('1', (Txt 'on: Umagon, Chameleon spy; heroes up to 3 times' 'an: Umagon, Chamäleon-Spion; Helden bis 3-mal'))) }
         @{ Id = 'ai'; Group = (Txt 'Enemies' 'Gegner'); Label = (Txt 'Computer opponents' 'Computergegner'); Default = '0'
             Choices = @(@('0', (Txt 'original' 'Original')), @('1', (Txt 'strong: more money, attack sooner, defend their base, repair everything at once, never sell' 'stark: mehr Geld, greifen früher an, verteidigen ihre Basis, reparieren alles gleichzeitig, verkaufen nie')), @('2', (Txt 'brutal: much more money, big teams, fierce base defense, repair everything, never sell' 'brutal: viel mehr Geld, grosse Teams, harte Basisverteidigung, reparieren alles, verkaufen nie'))) }
-        @{ Id = 'chaos'; Group = (Txt 'Enemies' 'Gegner'); Label = (Txt 'Meteorites and visceroids' 'Meteoriten und Viszeroiden'); Default = '0'
-            Choices = @(@('0', (Txt 'original' 'Original')), @('1', (Txt 'on' 'an'))) }
+        @{ Id = 'visceroids'; Group = (Txt 'Enemies' 'Gegner'); Label = (Txt 'Visceroids' 'Viszeroiden'); Default = '1'
+            Choices = @(@('1', (Txt 'original: infantry killed by Tiberium becomes a visceroid' 'Original: Infanterie, die im Tiberium stirbt, wird zum Viszeroid')), @('0', (Txt 'none' 'keine'))) }
         @{ Id = 'rmgsize'; Group = (Txt 'World' 'Welt'); Label = (Txt 'Random map size' 'Zufallskarten-Grösse'); Default = '1'
             Choices = @(@('0', (Txt 'original (50-175 cells)' 'Original (50-175 Felder)')), @('1', (Txt 'large (up to 220)' 'gross (bis 220)')), @('2', (Txt 'huge (200-235)' 'riesig (200-235)'))) }
         @{ Id = 'terrain'; Group = (Txt 'World' 'Welt'); Label = (Txt 'Random map terrain' 'Zufallskarten-Gelände'); Default = 'keep'
-            Choices = @(@('keep', (Txt 'as set in the game' 'wie im Spiel eingestellt')), @('flat', (Txt 'flat: hardly any cliffs and hills, room for huge bases' 'flach: kaum Klippen und Hügel, Platz für riesige Basen')), @('rugged', (Txt 'rugged: many cliffs, hills and plateaus' 'zerklüftet: viele Klippen, Hügel und Hochebenen'))) }
+            Choices = @(@('keep', (Txt 'as set in the game' 'wie im Spiel eingestellt')), @('perfect', (Txt 'perfectly flat: one level, no cliffs, no water, few trees - room for whole cities' 'perfekt flach: eine Ebene, keine Klippen, kein Wasser, wenig Bäume - Platz für ganze Städte')), @('flat', (Txt 'flat: hardly any cliffs and hills, room for huge bases' 'flach: kaum Klippen und Hügel, Platz für riesige Basen')), @('rugged', (Txt 'rugged: many cliffs, hills and plateaus' 'zerklüftet: viele Klippen, Hügel und Hochebenen'))) }
         @{ Id = 'tiberium'; Group = (Txt 'World' 'Welt'); Label = (Txt 'Random map Tiberium' 'Zufallskarten-Tiberium'); Default = '1'
             Choices = @(@('1', (Txt 'original amount' 'Original-Menge')), @('2', (Txt 'twice as much' 'doppelt so viel')), @('4', (Txt '4 times as much: big fields' 'viermal so viel: grosse Felder'))) }
-        @{ Id = 'fog'; Group = (Txt 'World' 'Welt'); Label = (Txt 'Fog of war' 'Nebel des Krieges'); Default = '0'
-            Choices = @(@('0', (Txt 'original' 'Original')), @('1', (Txt 'on' 'an'))) }
+        @{ Id = 'reveal'; Group = (Txt 'World' 'Welt'); Label = (Txt 'Map' 'Karte'); Default = '0'
+            Choices = @(@('0', (Txt 'original: unexplored land is black' 'Original: Unerforschtes ist schwarz')), @('1', (Txt 'whole map visible from the start' 'ganze Karte von Anfang an sichtbar'))) }
+        @{ Id = 'buildradius'; Group = (Txt 'World' 'Welt'); Label = (Txt 'Build distance' 'Bauabstand'); Default = '0'
+            Choices = @(@('0', (Txt 'original: 2 cells from your buildings' 'Original: 2 Felder neben deinen Gebäuden')), @('6', (Txt 'up to 6 cells away' 'bis 6 Felder entfernt')), @('10', (Txt 'up to 10 cells away' 'bis 10 Felder entfernt'))) }
         @{ Id = 'speed'; Group = (Txt 'Display' 'Anzeige'); Label = (Txt 'Game speed' 'Spieltempo'); Default = 'keep'
             Choices = @(@('keep', (Txt 'unchanged (as in the game)' 'unverändert (wie im Spiel eingestellt)')), @('1', (Txt '60 frames/s: fast and smooth' '60 Bilder/s: schnell und flüssig')), @('2', (Txt '30 frames/s: classic' '30 Bilder/s: klassisch')), @('3', (Txt '20 frames/s: relaxed' '20 Bilder/s: gemächlich')), @('0', (Txt 'unlimited (up to 120 frames/s, very fast)' 'unbegrenzt (bis 120 Bilder/s, sehr schnell)'))) }
         @{ Id = 'resolution'; Group = (Txt 'Display' 'Anzeige'); Label = (Txt 'Resolution' 'Auflösung'); Default = 'native'
@@ -56,9 +58,10 @@ function Get-Presets {
     return [ordered]@{
         (Txt 'Original' 'Original') = @{ rmgsize = '0' }
         (Txt 'Everything bigger' 'Alles grösser') = @{ rmgsize = '2'; terrain = 'flat'; tiberium = '4'; growth = '2'; arsenal = '1'; ai = '1'; buildspeed = '2'; harvester = '1.5'; resolution = 'native' }
-        (Txt 'Relaxed' 'Gemütlich') = @{ speed = '2'; cost = '0.5'; buildspeed = '3'; tibvalue = '2'; harvester = '2'; power = '2'; growth = '2'; arsenal = '1'; terrain = 'flat'; tiberium = '2' }
-        (Txt 'Hard test' 'Harte Probe') = @{ ai = '2'; superweapon = '0.5'; veteran = '2'; chaos = '1'; rmgsize = '1'; terrain = 'rugged' }
-        (Txt 'Chaos' 'Chaos') = @{ chaos = '1'; fog = '1'; arsenal = '1'; superweapon = '0.25'; veteran = '4'; strength = '1.5'; rmgsize = '2' }
+        (Txt 'City builder' 'Städtebau') = @{ rmgsize = '2'; terrain = 'perfect'; tiberium = '4'; growth = '2'; arsenal = '1'; buildspeed = '2'; harvester = '1.5'; power = '1.5'; reveal = '1'; visceroids = '0'; buildradius = '10'; resolution = 'native' }
+        (Txt 'Relaxed' 'Gemütlich') = @{ speed = '2'; cost = '0.5'; buildspeed = '3'; tibvalue = '2'; harvester = '2'; power = '2'; growth = '2'; arsenal = '1'; terrain = 'flat'; tiberium = '2'; buildradius = '6' }
+        (Txt 'Hard test' 'Harte Probe') = @{ ai = '2'; superweapon = '0.5'; veteran = '2'; rmgsize = '1'; terrain = 'rugged' }
+        (Txt 'Chaos' 'Chaos') = @{ arsenal = '1'; superweapon = '0.25'; veteran = '4'; strength = '1.5'; rmgsize = '2'; terrain = 'rugged'; tiberium = '4'; growth = '5' }
     }
 }
 
@@ -69,7 +72,7 @@ function Get-DefaultSettings {
 }
 
 function Test-RulesChanged($settings) {
-    foreach ($k in 'cost', 'buildspeed', 'tibvalue', 'harvester', 'growth', 'power', 'veteran', 'superweapon', 'strength', 'arsenal', 'ai', 'chaos', 'fog') {
+    foreach ($k in 'cost', 'buildspeed', 'tibvalue', 'harvester', 'growth', 'power', 'veteran', 'superweapon', 'strength', 'arsenal', 'ai', 'buildradius') {
         $d = (Get-OptionCatalog | Where-Object { $_.Id -eq $k }).Default
         if ($settings[$k] -and [string]$settings[$k] -ne [string]$d) { return $true }
     }
@@ -163,8 +166,18 @@ function New-RulesFile($fs, $settings) {
             $out.Set('AI', 'CreditReserve', '0'); $out.Set('IQ', 'SellBack', '99')
         }
     }
-    if ($settings['chaos'] -eq '1') { $out.Set('General', 'Meteorites', 'yes'); $out.Set('General', 'Visceroids', 'yes') }
-    if ($settings['fog'] -eq '1') { $out.Set('General', 'FogOfWar', 'yes') }
+    # Build distance: a building of yours may be placed up to Adjacent cells from your own buildings (the check,
+    # FUN_004761A0, scans the footprint widened by Adjacent + 1 and runs for the human player only).
+    $r = [int][string]$settings['buildradius']
+    if ($r -gt 0) {
+        foreach ($t in $types) {
+            if (-not (($rules['BuildingTypes'] -and $rules['BuildingTypes'].Values() -contains $t) -or ($out['BuildingTypes'] -and $out['BuildingTypes'].Values() -contains $t))) { continue }
+            $a = ConvertTo-Num (Eff $t 'Adjacent')
+            if ($null -ne $a -and $a -gt 0 -and $a -lt $r) { $out.Set($t, 'Adjacent', [string]$r) }
+        }
+    }
+    # Meteorites, ion storms, visceroids and fog of war are [SpecialFlags] of each map (FUN_005FCC60); the game never
+    # reads them from the rules. Visceroids and the whole map: memory patches in patcher.ps1.
 
     $text = $script:MarkerLine + "`r`n" + $out.ToText()
     return , ([TSExt.IniFile]::Enc.GetBytes($text))   # the comma keeps the byte[] in one piece

@@ -32,6 +32,11 @@ $configs = @(
     @{ Name = 'tibx4'; S = @{ 1021 = 50; 1020 = 50; 1001 = 40; 1016 = 60; 1015 = 60; 1008 = 30; 1012 = 60; 1013 = 30 }; F = 4 }
     @{ Name = 'flat-tibx4'; S = @{ 1021 = 100; 1020 = 100; 1001 = 0; 1016 = 100; 1015 = 100; 1008 = 5; 1012 = 25; 1013 = 10 }; F = 4 }
     @{ Name = 'rugged'; S = @{ 1021 = 0; 1020 = 30; 1001 = 90; 1016 = 60; 1015 = 60; 1008 = 30; 1012 = 60; 1013 = 30 }; F = 1 }
+    # 1.4 "perfectly flat": the sliders plus the patch that keeps the generator from splitting regions (Flat); P = players
+    @{ Name = 'flat-water0'; S = @{ 1021 = 100; 1020 = 100; 1001 = 0; 1016 = 60; 1015 = 60; 1008 = 0; 1012 = 10; 1013 = 0 }; F = 1 }
+    @{ Name = 'perfect'; S = @{ 1021 = 100; 1020 = 100; 1001 = 0; 1016 = 60; 1015 = 60; 1008 = 0; 1012 = 10; 1013 = 0 }; F = 1; Flat = $true }
+    @{ Name = 'perfect-8p'; S = @{ 1021 = 100; 1020 = 100; 1001 = 0; 1016 = 60; 1015 = 60; 1008 = 0; 1012 = 10; 1013 = 0 }; F = 1; Flat = $true; P = 8 }
+    @{ Name = 'perfect-tibx4'; S = @{ 1021 = 100; 1020 = 100; 1001 = 0; 1016 = 100; 1015 = 100; 1008 = 0; 1012 = 10; 1013 = 0 }; F = 4; Flat = $true }
 )
 if ($Only) { $configs = @($configs | Where-Object { ($Only -split ',') -contains $_.Name }) }
 
@@ -99,7 +104,11 @@ $p = [System.Diagnostics.Process]::Start($psi)
 $gp = $null
 try {
     Start-Sleep -Seconds 10
+    # the game that runs is the one with the game window (Steam may start it again as a new process)
+    [void](Wait-For { $script:gw0 = Get-Process -Name game -ErrorAction SilentlyContinue | Where-Object { [TSExt.Win]::TopWindows($_.Id) | Where-Object { [TSExt.Win]::ClassName($_) -eq 'Tiberian Sun' } } | Select-Object -First 1; $null -ne $script:gw0 } 40)
+    if ($script:gw0) { $p = $script:gw0 }
     $gp = New-Object TSExt.GameProcess $p
+    if (-not (Wait-For { try { [void]$gp.ReadUInt(0x5F407C); $true } catch { $false } } 30)) { throw "the game's memory cannot be read (process $($p.Id), exited: $($p.HasExited))" }
     Invoke-GamePatches $gp @{ rmgsize = '2'; tiberium = '1' } | ForEach-Object { "  $_" }
     "  " + (Install-TiberiumFactor $gp 1)
     "  RandMap.Map write: " + $gp.VerifyPatch(0x53A620, [byte[]](0x74, 0x22), [byte[]](0x90, 0x90))
@@ -134,7 +143,8 @@ try {
         if (-not (Wait-For { (Find-Control $p.Id 1016) -ne [IntPtr]::Zero } 15)) { throw 'no random map dialog' }
         Start-Sleep -Milliseconds 800
         Set-Combo $p.Id 1000 0; Set-Combo $p.Id 1009 3; Set-Combo $p.Id 1011 3
-        Set-Slider $p.Id 1003 4
+        Set-Slider $p.Id 1003 $(if ($cfg.P) { $cfg.P } else { 4 })
+        $gp.Write([uint32]$script:NoSplitPatch.At, $(if ($cfg.Flat) { $script:NoSplitPatch.New } else { $script:NoSplitPatch.Orig }))
         foreach ($k in $cfg.S.Keys) { Set-Slider $p.Id ([int]$k) ([int]$cfg.S[$k]) }
         $gp.Write(0x805E78, [BitConverter]::GetBytes([int]$Seed))   # seed (+0x68; the Firestorm dialog has no seed field)
         $gp.Write([uint32]$script:TibFactorAddress, [BitConverter]::GetBytes([int]$cfg.F))

@@ -44,6 +44,23 @@ Check 'context: the start field amount goes to FUN_005468F0 (CALL 0x5468F0 at 0x
 Check ('repair flag test 0x{0:X}: JNZ +0x14D' -f $script:RepairPatch.At) ((Hex (Get-Bytes $script:RepairPatch.At 6)) -eq (Hex $script:RepairPatch.Orig))
 Check 'context: MOV AL,[ECX+0x118]; TEST AL,AL before' ((Hex (Get-Bytes 0x4355C8 8)) -eq '8A 81 18 01 00 00 84 C0')
 Check 'the patched jump skips to the end of the building AI (0x435723)' ((0x4355D6 + 0x14D) -eq 0x435723)
+"perfectly flat random maps:"
+Check ('region split test 0x{0:X}: JLE +0x0D' -f $script:NoSplitPatch.At) ((Hex (Get-Bytes $script:NoSplitPatch.At 2)) -eq (Hex $script:NoSplitPatch.Orig))
+Check 'context: CMP [ESI+8],EBX (cells of the region vs. limit) before, MOV ECX,ESI; CALL 0x532580 (split) after' (((Hex (Get-Bytes 0x533CEB 3)) -eq '39 5E 08') -and ((Hex (Get-Bytes 0x533CF0 7)) -eq '8B CE E8 89 E8 FF FF'))
+Check 'context: the limit in EBX is (RegionSize * 0.005 + 0.05) * width * height * 2 (FILD [0x805E74] at 0x533C99)' ((Hex (Get-Bytes 0x533C99 6)) -eq 'DB 05 74 5E 80 00')
+Check 'the jump target 0x533CFD marks the region as done (MOV byte [ESI+0x16],1)' ((Hex (Get-Bytes 0x533CFD 4)) -eq 'C6 46 16 01')
+"visceroids:"
+foreach ($v in $script:VisceroidPatches) { Check ('TiberiumDeathToVisceroid test 0x{0:X}: JZ rel32' -f $v.At) ((Hex (Get-Bytes $v.At 6)) -eq (Hex $v.Orig)) }
+Check 'context: both read byte [Scen+0x1D8F] right before (MOV AL/CL,[reg+0x1D8F]; TEST)' (((Hex (Get-Bytes 0x4D3FE3 8)) -eq '8A 81 8F 1D 00 00 84 C0') -and ((Hex (Get-Bytes 0x5A38AE 8)) -eq '8A 88 8F 1D 00 00 84 C9'))
+"whole map visible:"
+Check ('frame counter 0x{0:X}: INC dword [0x7E4924]' -f $script:RevealHookAt) ((Hex (Get-Bytes $script:RevealHookAt 6)) -eq (Hex $script:RevealHookOrig))
+Check 'context: the crate "reveal" calls 0x51E0A0 with ECX = 0x748348 (0x45810E)' (((Hex (Get-Bytes 0x4580F5 5)) -eq 'B9 48 83 74 00') -and ((Hex (Get-Bytes 0x45810E 5)) -eq 'E8 8D 5F 0C 00'))
+Check 'FUN_0051E0A0 tests the flag of the player house first (MOV EAX,[0x7E2284]; MOV CL,[EAX+0x114]; TEST CL,CL)' ((Hex (Get-Bytes 0x51E0A0 13)) -eq 'A1 84 22 7E 00 8A 88 14 01 00 00 84 C9')
+$cave = Get-RevealCave
+Check ('cave: original INC first, PUSHAD ... POPAD, {0} bytes' -f $cave.Length) (((Hex $cave[0..5]) -eq (Hex $script:RevealHookOrig)) -and $cave[6] -eq 0x60 -and $cave[$cave.Length - 1] -eq 0x61)
+# both short jumps land on the POPAD
+$jz = 6 + 1 + 5 + 2; $jnz = $jz + 2 + 7
+Check 'cave: JZ and JNZ land on POPAD' (($cave[$jz] -eq 0x74) -and ($jz + 2 + $cave[$jz + 1] -eq $cave.Length - 1) -and ($cave[$jnz] -eq 0x75) -and ($jnz + 2 + $cave[$jnz + 1] -eq $cave.Length - 1))
 
 "random map sliders (with a stand-in for the game's memory):"
 # the generator object as the game has it at the start: players 2, Tiberium 1, all other sliders 0
@@ -55,6 +72,8 @@ $fake.Mem[[uint32]($script:RmgObject + $script:RmgFields.Tiberium)] = 1
 $r = Set-RmgSliders $fake $script:TerrainSliders['flat'] 'flat'
 $ok = $true; foreach ($k in $script:TerrainSliders['flat'].Keys) { if ($fake.ReadInt([uint32]($script:RmgObject + $script:RmgFields[$k])) -ne $script:TerrainSliders['flat'][$k]) { $ok = $false } }
 Check "flat: $r" $ok
+$r = Set-RmgSliders $fake $script:TerrainSliders['perfect'] 'perfect'
+Check "perfect: $r" ($fake.ReadInt([uint32]($script:RmgObject + $script:RmgFields.WaterAmount)) -eq 0 -and $fake.ReadInt([uint32]($script:RmgObject + $script:RmgFields.UrbanPresence)) -eq 0)
 Check 'flat: Tiberium slider untouched (1)' ($fake.ReadInt([uint32]($script:RmgObject + $script:RmgFields.Tiberium)) -eq 1)
 Check ('field offsets match the dialog code (FUN_0053A8C0): RegionSize +0x64, Ruggedness +0x38, Accessibility +0x60') ($script:RmgFields.RegionSize -eq 0x64 -and $script:RmgFields.Ruggedness -eq 0x38 -and $script:RmgFields.Accessibility -eq 0x60)
 $empty = New-Object PSObject -Property @{ Mem = @{} }

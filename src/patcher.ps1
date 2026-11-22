@@ -103,8 +103,45 @@ $script:RmgFields = [ordered]@{
 }
 $script:RmgObject = 0x805E10
 $script:TerrainSliders = @{
-    flat   = [ordered]@{ RegionSize = 100; Ruggedness = 0; Accessibility = 100; WaterAmount = 5; Vegetation = 25; UrbanPresence = 10 }
-    rugged = [ordered]@{ RegionSize = 0; Ruggedness = 90; Accessibility = 30; WaterAmount = 30; Vegetation = 60; UrbanPresence = 30 }
+    perfect = [ordered]@{ RegionSize = 100; Ruggedness = 0; Accessibility = 100; WaterAmount = 0; Vegetation = 10; UrbanPresence = 0 }
+    flat    = [ordered]@{ RegionSize = 100; Ruggedness = 0; Accessibility = 100; WaterAmount = 5; Vegetation = 25; UrbanPresence = 10 }
+    rugged  = [ordered]@{ RegionSize = 0; Ruggedness = 90; Accessibility = 30; WaterAmount = 30; Vegetation = 60; UrbanPresence = 30 }
+}
+
+# "Perfectly flat": every cell starts on level 4 (FUN_0053D950). "Making regions" (FUN_00533AD0) then splits every
+# region with more cells than (RegionSize * 0.005 + 0.05) * width * height * 2 - even at RegionSize 100 the whole map
+# is split two or three times - and FUN_00532580 puts each new part 4 levels above or below its neighbours: that is
+# where the cliffs come from (flat maps had the levels 0, 4 and 8). Turning the JLE at 0x533CEE into a JMP marks every
+# region as done without splitting it, so the map stays on one level. With WaterAmount 0 the water step
+# (FUN_0053EE70, lakes in lowered ground) does not run either.
+$script:NoSplitPatch = @{ At = 0x533CEE; Orig = [byte[]](0x7E, 0x0D); New = [byte[]](0xEB, 0x0D) }
+
+# Visceroids: infantry killed by Tiberium becomes a visceroid when the map has [Basic] TiberiumDeathToVisceroid=yes
+# (Scen+0x1D8F; random maps write yes). Both places that test it (infantry damage 0x4D3FEB, 0x5A38B6) jump over the
+# creation when it is off; the patch makes these jumps unconditional (JZ rel32 -> NOP, JMP rel32: same target).
+$script:VisceroidPatches = @(
+    @{ At = 0x4D3FEB; Orig = [byte[]](0x0F, 0x84, 0xAB, 0x00, 0x00, 0x00); New = [byte[]](0x90, 0xE9, 0xAB, 0x00, 0x00, 0x00) }
+    @{ At = 0x5A38B6; Orig = [byte[]](0x0F, 0x84, 0xA9, 0x00, 0x00, 0x00); New = [byte[]](0x90, 0xE9, 0xA9, 0x00, 0x00, 0x00) }
+)
+
+# Whole map visible: FUN_0051E0A0 (ECX = map 0x748348) reveals every cell for the player's house (PlayerPtr 0x7E2284)
+# and sets its flag +0x114; the game calls it for the "reveal" crate, the trigger action and a defeated player.
+# A hook on the frame counter of the main loop (INC [0x7E4924] at 0x50937D, once per game frame) calls it whenever
+# the player's flag is clear - in the first frame of every battle, and again after a "shroud" crate.
+$script:RevealHookAt = 0x50937D
+$script:RevealHookOrig = [byte[]](0xFF, 0x05, 0x24, 0x49, 0x7E, 0x00)
+function Get-RevealCave {
+    return [byte[]]($script:RevealHookOrig + @(
+            0x60,                                       # PUSHAD
+            0xA1, 0x84, 0x22, 0x7E, 0x00,               # MOV EAX,[0x7E2284]      player's house
+            0x85, 0xC0,                                 # TEST EAX,EAX
+            0x74, 0x15,                                 # JZ done
+            0x80, 0xB8, 0x14, 0x01, 0x00, 0x00, 0x00,   # CMP byte [EAX+0x114],0  map already revealed?
+            0x75, 0x0C,                                 # JNZ done
+            0xB9, 0x48, 0x83, 0x74, 0x00,               # MOV ECX,0x748348
+            0xB8, 0xA0, 0xE0, 0x51, 0x00,               # MOV EAX,0x51E0A0
+            0xFF, 0xD0,                                 # CALL EAX
+            0x61))                                      # done: POPAD
 }
 
 # Writes start values of random map sliders. Checks first that the object looks like it should (players 2..8, every
@@ -171,6 +208,15 @@ function Invoke-GamePatches($gp, $settings) {
     }
     $terrain = $script:TerrainSliders[[string]$settings['terrain']]
     if ($terrain) { $log.Add((Set-RmgSliders $gp $terrain ([string]$settings['terrain']))) }
+    if ([string]$settings['terrain'] -eq 'perfect') {
+        $log.Add(('RMG one level (no region split) 0x{0:X}: {1}' -f $script:NoSplitPatch.At, $gp.VerifyPatch([uint32]$script:NoSplitPatch.At, $script:NoSplitPatch.Orig, $script:NoSplitPatch.New)))
+    }
+    if ([string]$settings['visceroids'] -eq '0') {
+        foreach ($v in $script:VisceroidPatches) { $log.Add(('no visceroids 0x{0:X}: {1}' -f $v.At, $gp.VerifyPatch([uint32]$v.At, $v.Orig, $v.New))) }
+    }
+    if ([string]$settings['reveal'] -eq '1') {
+        $log.Add(('whole map visible 0x{0:X}: {1}' -f $script:RevealHookAt, $gp.InstallHook([uint32]$script:RevealHookAt, $script:RevealHookOrig, (Get-RevealCave))))
+    }
     $tib = [string]$settings['tiberium']
     if ($tib -match '^\d+$' -and [int]$tib -gt 1) {
         # sliders "Tiberiummenge" and "Tiberiumfelder" to the right (they start at 1 and 0), then the factor

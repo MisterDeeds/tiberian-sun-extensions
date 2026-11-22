@@ -98,7 +98,7 @@ $fGroup = New-Object System.Drawing.Font 'Segoe UI', 10.5, ([System.Drawing.Font
 
 $form = New-Object System.Windows.Forms.Form
 $form.Text = (Txt 'Tiberian Sun - Extensions' 'Tiberian Sun - Erweiterungen') + " $Version"
-$form.Size = New-Object System.Drawing.Size 860, 760
+$form.Size = New-Object System.Drawing.Size 860, 800
 $form.MinimumSize = New-Object System.Drawing.Size 760, 640
 $form.StartPosition = 'CenterScreen'
 $form.BackColor = $cBack; $form.ForeColor = $cText; $form.Font = $fBase
@@ -231,7 +231,7 @@ $hint = New-Object System.Windows.Forms.Label
 $hint.AutoSize = $false; $hint.Size = New-Object System.Drawing.Size 770, 64
 $hint.Location = New-Object System.Drawing.Point 14, ([math]::Max($rowY[0], $rowY[1]) + 12)
 $hint.ForeColor = $cDim
-$hint.Text = Txt 'In the game, click "Firestorm" on the first screen. Huge worlds: Skirmish > Multiplayer map > Random map, map width and height "Very large" (up to 235 x 235 cells with "huge"; terrain and Tiberium as chosen above, the sliders there can still be moved). The options apply to skirmish games and campaigns; everything is undone when the game ends, so a game started from Steam is always the original.' 'Im Spiel auf dem ersten Bildschirm "Feuersturm" anklicken. Riesige Welten: Gefecht > Mehrspieler-Karte > Zufallskarte, Kartenbreite und -höhe "Sehr groß" (mit "riesig" bis 235 × 235 Felder; Gelände und Tiberium wie oben gewählt, die Regler dort lassen sich weiter verschieben). Die Optionen gelten für Gefechte und Kampagnen; nach dem Spiel ist alles wieder wie vorher, ein Start über Steam ist immer das Original.'
+$hint.Text = Txt 'In the game: "Firestorm" on the first screen, then Skirmish > Multiplayer map > Random map, width and height "Very large" (up to 235 x 235 cells with "huge"; terrain and Tiberium as chosen above). The options apply to skirmish games and campaigns; after the game everything is as before, a start from Steam is always the original.' 'Im Spiel: "Feuersturm" auf dem ersten Bildschirm, dann Gefecht > Mehrspieler-Karte > Zufallskarte, Breite und Höhe "Sehr groß" (mit "riesig" bis 235 × 235 Felder; Gelände und Tiberium wie oben gewählt). Die Optionen gelten für Gefechte und Kampagnen; nach dem Spiel ist alles wie vorher, ein Start über Steam ist immer das Original.'
 $tabPlay.Controls.Add($hint)
 
 function Get-UiSettings {
@@ -536,7 +536,8 @@ $form.Add_Shown({
             $out += "update row: shown=$($updateLabel.Visible) text=[$($updateLabel.Text)] update button=$($btnUpdate.Visible) news button=$($btnNews.Visible) started=[$($script:UpdateLog -join ', ')]"
             if ($PreviewImage) {
                 $tabs.SelectedIndex = 0; $form.Refresh()
-                if ($presetButtons.Count -gt 1) { $presetButtons[1].PerformClick(); $form.Refresh() }     # "Everything bigger" (needs its tab in front)
+                $shown = $presetButtons | Where-Object { $_.Tag -eq (Txt 'City builder' 'Städtebau') } | Select-Object -First 1
+                if ($shown) { $shown.PerformClick(); $form.Refresh() }     # "City builder" (needs its tab in front)
                 $image = New-Object System.Drawing.Bitmap($form.Width, $form.Height)
                 $form.DrawToBitmap($image, (New-Object System.Drawing.Rectangle(0, 0, $form.Width, $form.Height)))
                 $image.Save($PreviewImage, [System.Drawing.Imaging.ImageFormat]::Png); $image.Dispose()

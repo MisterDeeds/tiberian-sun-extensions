@@ -47,8 +47,15 @@ foreach ($lvl in '1', '2') {
     Check "ai $lvl`: more defense teams (MinimumAIDefensiveTeams $((Eff $orig 'General' 'MinimumAIDefensiveTeams')) -> $((Eff $out 'General' 'MinimumAIDefensiveTeams')))" ((Num ((Eff $out 'General' 'MinimumAIDefensiveTeams') -split ',')[0]) -gt (Num ((Eff $orig 'General' 'MinimumAIDefensiveTeams') -split ',')[0]))
     Check "ai $lvl`: the rest of [IQ] stays (RepairSell $((Eff $out 'IQ' 'RepairSell')))" ((Eff $out 'IQ' 'RepairSell') -eq (Eff $orig 'IQ' 'RepairSell'))
 }
-$set = Get-DefaultSettings; $set['terrain'] = 'flat'; $set['tiberium'] = '4'
-Check 'terrain and Tiberium are no rules options (no EXPAND99.MIX for them alone)' (-not (Test-RulesChanged $set))
+$set = Get-DefaultSettings; $set['buildradius'] = '10'
+$out = [TSExt.IniFile]::Parse((New-RulesFile $fs $set))
+Check "build distance 10: GAPOWR Adjacent $((Eff $orig 'GAPOWR' 'Adjacent')) -> $((Eff $out 'GAPOWR' 'Adjacent')), NAOBEL $((Eff $orig 'NAOBEL' 'Adjacent')) -> $((Eff $out 'NAOBEL' 'Adjacent'))" ((Eff $out 'GAPOWR' 'Adjacent') -eq '10' -and (Eff $out 'NAOBEL' 'Adjacent') -eq '10')
+Check "build distance 10: CABHUT stays $((Eff $out 'CABHUT' 'Adjacent')) (0 = not placed by players), units untouched ($(Eff $out 'MMCH' 'Adjacent'))" ((Eff $out 'CABHUT' 'Adjacent') -eq (Eff $orig 'CABHUT' 'Adjacent') -and $null -eq (Eff $out 'MMCH' 'Adjacent'))
+$set = Get-DefaultSettings; $set['buildradius'] = '6'
+$out = [TSExt.IniFile]::Parse((New-RulesFile $fs $set))
+Check "build distance 6: GAPOWR $((Eff $out 'GAPOWR' 'Adjacent')), wall GAWALL $((Eff $orig 'GAWALL' 'Adjacent')) -> $((Eff $out 'GAWALL' 'Adjacent'))" ((Eff $out 'GAPOWR' 'Adjacent') -eq '6' -and (Eff $out 'GAWALL' 'Adjacent') -eq '6')
+$set = Get-DefaultSettings; $set['terrain'] = 'perfect'; $set['tiberium'] = '4'; $set['reveal'] = '1'; $set['visceroids'] = '0'
+Check 'terrain, Tiberium, whole map and visceroids are no rules options (no EXPAND99.MIX for them alone)' (-not (Test-RulesChanged $set))
 
 foreach ($pn in (Get-Presets).Keys) {
     $set = Get-DefaultSettings; foreach ($k in (Get-Presets)[$pn].Keys) { $set[$k] = (Get-Presets)[$pn][$k] }

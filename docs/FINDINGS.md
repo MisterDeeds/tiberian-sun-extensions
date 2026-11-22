@@ -162,6 +162,76 @@ Firestorm mission.
   `[MultiplayerDefaults] TiberiumGrows` (`+0xF5B`) is stored but never used.
 - Versions 1.0–1.2 made *Tiberium growth: fast* slower (they multiplied Growth and Spread); 1.3 divides them.
 
+### Perfectly flat (1.4)
+
+- Order of the generator (FUN_0053CE70, log lines "RMG: …"): init (FUN_0053D950: every cell gets level
+  `+0x110` = 4), seeding water (FUN_0053EE70, only if WaterAmount ≠ 0: above 20 a big water body, then always a lake
+  FUN_0053EFF0 / FUN_00540690), init regions (flood fill of cells on one level, FUN_00531EF0 / FUN_00531780), making
+  regions (FUN_00533AD0), cliffs between regions (FUN_00533E10), start positions, lights, veinholes, Tiberium, urban
+  areas, hills (FUN_005478D0, Ruggedness), LATs and rocks.
+- Making regions: a region with more cells than `(RegionSize × 0.005 + 0.05) × width × height × 2` (0x533C99 –
+  0x533CBE; the map has about `1.85 × width × height` cells) is split by FUN_00532580. A new part looks at the levels
+  of its neighbours: all the same `h` → `h − 4` (if `h > 3`) or `h + 4` (if `h < 8`); 4 apart → one of them; 8 apart →
+  the middle; then a random choice, and all its cells move by the difference. Parts under 101 cells join their
+  biggest neighbour instead. So even RegionSize 100 (limit 1.1 × width × height) splits the whole map two or three
+  times: the flat maps of 1.3 had the levels 0, 4 and 8 (cells per level, 225 × 225, seed 4711:
+  0: 36,588 – 4: 45,067 – 8: 24,937, plus about 40 ramp cells on each level between), and every border between them
+  is a cliff (2.2 % of the map).
+- The slider cannot go higher (the dialog reads the field back from the trackbar, range 0–100). The patch for
+  *perfectly flat* turns the `JLE` at 0x533CEE (`CMP [ESI+8],EBX` = cells against the limit) into `JMP`: every region
+  goes to 0x533CFD (`MOV byte [ESI+0x16],1`, done) without a split. With WaterAmount 0 the water step does not run
+  either, Ruggedness 0 makes no hills, UrbanPresence 0 no ruins; Vegetation 10 leaves some trees.
+- Measured (dev\rmg-survey.ps1 + dev\rmg-stats.ps1, seed 4711, 2026-11-22; sliders Klippen 100, Zugänge 100, Berge 0,
+  Gewässer 0, Vegetation 10, Ruinen 0):
+
+  | Map | Levels | Cliff | Water | Buildable | Largest flat area | Tiberium cells |
+  |---|---|---|---|---|---|---|
+  | water 0, without the patch, 4 players | 0 and 4 | 1.7 % | 0 % | 95.9 % | 51,807 | 1,809 |
+  | **perfectly flat**, 4 players (225 × 225) | 4 only | 0 % | 0 % | 97.9 % | 97,241 | 1,903 |
+  | perfectly flat, 8 players (235 × 235) | 4 only | 0 % | 0 % | 95.7 % | 103,791 | 4,096 |
+  | perfectly flat, Tiberium 100/100, factor 4 | 4 only | 0 % | 0 % | 91.0 % | 90,212 | 8,735 |
+
+  Without the patch even water 0 leaves two levels (the split alone makes them). With it every cell is on level 4;
+  the largest area is the whole map minus Tiberium, trees and the odd rock. Each map took 5 s; the battle on the last
+  one ran (frame 3415 → 4015 in 5 s).
+
+## Map flags, visceroids and the shroud (1.4)
+
+- `[SpecialFlags]` of a map are read by FUN_005FCC60 into the first dword of the scenario (`Scen` = `[0x7E2438]`,
+  called at the start of FUN_005DFDE0, `[Basic]`): bit 4 Inert, 5 TiberiumGrows, 6 TiberiumSpreads, 7 MCVDeploy,
+  8 InitialVeteran, 9 FixedAlliance, 10 HarvesterImmune, 11 FogOfWar, 13 TiberiumExplosive, 14 DestroyableBridges,
+  15 Meteorites, 16 IonStorms, 17 Visceroids. IonStorms, Meteorites and Visceroids are always read;
+  TiberiumGrows … FogOfWar only for a single player mission (`[0x7E2458]` = 0) or in debug mode (`[0x7E490A]`).
+- The strings `FogOfWar`, `Visceroids`, `Meteorites`, `IonStorms` have two references each: this reader and the
+  writer FUN_005FCAF0. **The rules keys `[General] FogOfWar / Visceroids / Meteorites / IonStorms` are never read**
+  – the options *Meteorites and visceroids* and *Fog of war* of versions 1.0 to 1.3 (rules keys) did nothing.
+  A scan of all 970 places that load `[0x7E2438]` found tests of bits 8–11 and 13 but none of 15, 16 or 17.
+- Random maps write all four as `no` and `[Basic] TiberiumDeathToVisceroid=yes` (`Scen+0x1D8F`, default 1 at
+  0x5DB134): infantry killed by Tiberium becomes a visceroid. Tested at 0x4D3FE3 and 0x5A38AE (infantry damage,
+  result 4 = destroyed); the option *Visceroids: none* makes both following `JZ` unconditional.
+- Shroud: FUN_0051E0A0 (`ECX` = map 0x748348) reveals every cell for the player's house (PlayerPtr `[0x7E2284]`)
+  if its flag `+0x114` is clear, sets the flag, redraws the radar. Callers: the "reveal" crate (0x45810E – with the
+  flag already set it calls FUN_0051E010, which shrouds the map again and clears the flag; the "shroud" crate does
+  that too), the defeated player (0x4BF5D6) and the trigger action (0x626B48). The option *whole map visible* hooks
+  the frame counter of the main loop (FUN_00508A40, `INC [0x7E4924]` at 0x50937D, once per game frame): if PlayerPtr
+  is set and its flag clear, it calls FUN_0051E0A0 – in the first frame of every battle and again after a shroud
+  crate.
+- Build distance: FUN_004761A0 checks a building of the human player (house = PlayerPtr; computer houses always
+  pass) – the footprint widened by `Adjacent + 1` cells (BuildingType `+0x504`, `[*] Adjacent=`, 2 for most
+  buildings, 3–4 for defenses and walls) must contain a cell of the player or a building with BaseNormal. The option
+  raises Adjacent to 6 or 10 for every building type that has more than 0.
+- Checked in the game (dev\launcher-game-test.ps1, 2026-11-22, run by dev\run-when-idle.ps1 while the PC was idle):
+  launcher with *perfectly flat*, *Tiberium × 4*, *brutal*, *whole map visible*, *visceroids: none*, *build distance
+  10*: in memory the split jump `EB`, both visceroid jumps `90 E9`, the reveal hook; `GAPOWR` / `NAHAND` Adjacent 10
+  in EXPAND99.MIX; the dialog showed Gewässer 0, Ruinen 0, Vegetation 10; in the battle (215 × 215) the flag `+0x114`
+  of the player house was 1 and the screen showed the map without shroud far from the own units; the battle ran 2
+  minutes (frame 4652 → 19247); afterwards SUN.INI identical, EXPAND99.MIX gone.
+- Running the game in the background does not work: on an invisible desktop (CreateDesktop) it stops with
+  "Fehler - Grafikmodus kann nicht eingerichtet werden", also with DDrawCompat `FullscreenMode=borderless`; started
+  minimized with `AltTabFix=noactivateapp` it ignores menu clicks sent as window messages; behind other windows the
+  DDrawCompat presentation window comes back on top. dev\run-when-idle.ps1 therefore runs the tests only while nobody
+  uses the PC and ends the game at the first real input (low-level hooks; the tests' own input is flagged injected).
+
 ## Sidebar and high resolutions
 
 - Sidebar rectangle `0x74C240` x, `0x74C244` y, `0x74C248` width (168), `0x74C24C` height (= screen height − 148).

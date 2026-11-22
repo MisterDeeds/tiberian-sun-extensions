@@ -1,4 +1,4 @@
-﻿TIBERIAN SUN - EXTENSIONS 1.3.2
+﻿TIBERIAN SUN - EXTENSIONS 1.4.0
 ===============================
 
 Fan project for Command & Conquer Tiberian Sun and Firestorm (Steam).
@@ -13,11 +13,19 @@ HUGE WORLDS
 Skirmish > Multiplayer map > Random map. Set map width and height to "Very large".
 With the option "Random map size: huge" maps are 200 to 235 cells wide and high, with "large" up to 220
 (original: at most 175, with 4 players 128).
-"Random map terrain: flat" - hardly any hills and cliffs, little water: room for huge bases (92 % of the map
+"Random map terrain: perfectly flat" - the whole map on one level: no cliffs, no water, no ruins, few trees -
+room for whole cities. "flat" - hardly any hills and cliffs, little water, a few big plateaus (92 % of the map
 buildable instead of 59 %); "rugged" - many plateaus, hills and passes.
 "Random map Tiberium: twice / 4 times as much" - the generator gives a map the same amount of Tiberium however
 big it is; the option multiplies it, in the fields and next to every start position.
 The sliders of the random map dialog start at these values; you can still move them.
+
+CITY BUILDING
+"Map: whole map visible from the start" - no black, unexplored land. "Build distance" - place your buildings
+up to 6 or 10 cells away from your base (original: 2). "Visceroids: none" - infantry killed by Tiberium no
+longer turns into visceroids. Meteorites and fog of war are off on random maps anyway; ion storms only if you
+tick "Ion storm" in the random map dialog.
+Preset "City builder": huge, perfectly flat, 4 x Tiberium, whole map visible, no visceroids, build distance 10.
 
 TOUGHER OPPONENTS
 "Computer opponents: strong / brutal" - more money, earlier and bigger attacks, a fierce defense of their base;
@@ -43,8 +51,8 @@ maps of your game ("Rebuild missions" in the start window builds them again).
 
 WHAT CHANGES WHERE
 - Rules options: EXPAND99.MIX in the game folder, only while the game runs.
-- Random maps (size, terrain sliders, Tiberium), repairs of the computer opponents and sidebar fix: only in the
-  memory of the running game.
+- Random maps (size, terrain, Tiberium), whole map visible, visceroids, repairs of the computer opponents and
+  sidebar fix: only in the memory of the running game.
 - Campaigns: TSX*.MAP and BATTLEX.INI in the game folder.
 - Resolution and game speed: [Video] and [Options] in SUN.INI, set back after the game.
 No original file is changed. A start from Steam is always the original.

@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.4.0 – 2026-11-22
+
+- New terrain **perfectly flat**: the whole random map lies on one level – no cliffs, no water, no ruins, few
+  trees, room for whole cities. (*flat* still had three levels with cliffs between them: the generator splits big
+  areas and lifts or lowers each part; a memory patch stops that.) Measured on 225 × 225: one level, 0 % cliffs and
+  water, 98 % buildable and all of it in one piece (*flat*: largest area 35,628 cells, now 97,241); also with 8 players
+  on 235 × 235.
+- New option **Map: whole map visible from the start** – no black, unexplored land.
+- New option **Visceroids: none** – infantry killed by Tiberium no longer turns into visceroids.
+- New option **Build distance**: place your buildings up to 6 or 10 cells away from your base (original: 2).
+- New preset **City builder**: huge, perfectly flat, 4 × Tiberium, whole map visible, no visceroids, build
+  distance 10.
+- Removed: the options *Meteorites and visceroids* and *Fog of war* – the game never read them from the rules, so
+  they did nothing. Meteorites and fog of war are off on random maps anyway; ion storms come only if you tick
+  *Ion storm* in the random map dialog.
+- Checked in the game: generated maps, a battle on a perfectly flat map, and the launcher end to end with all new
+  options (whole map visible from the first frame, battle 2 minutes, everything put back afterwards).
+- Launcher window a bit taller; new analysis tool `dev\run-when-idle.ps1` (runs the in-game tests only while nobody
+  uses the PC and stops at the first mouse or key press).
+
 ## 1.3.2 – 2026-11-16
 
 - Fixed: the automatic update often did not start when the launcher was opened from the **desktop shortcut**
